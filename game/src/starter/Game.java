@@ -14,8 +14,8 @@ import controller.AbstractController;
 import controller.SystemController;
 import ecs.components.MissingComponentException;
 import ecs.components.PositionComponent;
-import ecs.entities.Entity;
-import ecs.entities.Hero;
+import ecs.components.ai.idle.Idle;
+import ecs.entities.*;
 import ecs.systems.*;
 import graphic.DungeonCamera;
 import graphic.Painter;
@@ -72,7 +72,9 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
     public static ILevel currentLevel;
     private static PauseMenu<Actor> pauseMenu;
     private static Entity hero;
+    private static ArrayList<Monster> monster = new ArrayList<>();
     private Logger gameLogger;
+    public int levelCounter = 0;
 
     public static void main(String[] args) {
         // start the game
@@ -127,13 +129,29 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         manageEntitiesSets();
         getHero().ifPresent(this::loadNextLevelIfEntityIsOnEndTile);
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) togglePause();
+        for(Monster m : monster) {
+
+        }
     }
 
     @Override
     public void onLevelLoad() {
+        monster.clear();
+        levelCounter++;
         currentLevel = levelAPI.getCurrentLevel();
         entities.clear();
         getHero().ifPresent(this::placeOnLevelStart);
+        int rnd = new Random().nextInt(5);
+        for(int i = 0; i < rnd; i++) {
+            int rnd_mon = new Random().nextInt(3);
+            if(rnd_mon == 0) {
+                monster.add(new Biter(levelCounter));
+            } else if(rnd_mon == 1) {
+                monster.add(new Zombie(levelCounter));
+            } else {
+                monster.add(new LittleDragon(levelCounter));
+            }
+        }
     }
 
     private void manageEntitiesSets() {
@@ -187,6 +205,17 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
                                 .orElseThrow(
                                         () -> new MissingComponentException("PositionComponent"));
         pc.setPosition(currentLevel.getStartTile().getCoordinate().toPoint());
+        for(Monster m : monster) {
+            entities.add(m);
+            PositionComponent npc =
+                (PositionComponent)
+                    m.getComponent(PositionComponent.class)
+                        .orElseThrow(
+                            () -> new MissingComponentException("PositionComponent"));
+            npc.setPosition(currentLevel.getRandomFloorTile().getCoordinate().toPoint());
+            m.getAi().setIdleAI(new Idle(Idle.MODE.IDLE));
+            m.getAi().execute();
+        }
     }
 
     /** Toggle between pause and run */
