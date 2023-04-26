@@ -37,7 +37,7 @@ import tools.Point;
 /** The heart of the framework. From here all strings are pulled. */
 public class Game extends ScreenAdapter implements IOnLevelLoader {
 
-    private final LevelSize LEVELSIZE = LevelSize.SMALL;
+    private final LevelSize LEVELSIZE = LevelSize.LARGE;
 
     /**
      * The batch is necessary to draw ALL the stuff. Every object that uses draw need to know the
@@ -129,9 +129,6 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         manageEntitiesSets();
         getHero().ifPresent(this::loadNextLevelIfEntityIsOnEndTile);
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) togglePause();
-        for(Monster m : monster) {
-
-        }
     }
 
     @Override
@@ -141,7 +138,8 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         currentLevel = levelAPI.getCurrentLevel();
         entities.clear();
         getHero().ifPresent(this::placeOnLevelStart);
-        int rnd = new Random().nextInt(5);
+        int rnd = new Random().nextInt(20);
+        rnd++;
         for(int i = 0; i < rnd; i++) {
             int rnd_mon = new Random().nextInt(3);
             if(rnd_mon == 0) {
@@ -213,8 +211,6 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
                         .orElseThrow(
                             () -> new MissingComponentException("PositionComponent"));
             npc.setPosition(currentLevel.getRandomFloorTile().getCoordinate().toPoint());
-            m.getAi().setIdleAI(new Idle(Idle.MODE.IDLE));
-            m.getAi().execute();
         }
     }
 

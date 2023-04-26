@@ -2,10 +2,17 @@ package ecs.entities;
 
 import dslToGame.AnimationBuilder;
 import ecs.components.AnimationComponent;
+import ecs.components.HitboxComponent;
 import ecs.components.PositionComponent;
 import ecs.components.VelocityComponent;
 import ecs.components.ai.AIComponent;
+import ecs.components.ai.idle.Idle;
+import ecs.components.ai.idle.PatrouilleWalk;
+import ecs.components.ai.idle.RadiusWalk;
+import ecs.components.ai.idle.StaticRadiusWalk;
 import graphic.Animation;
+
+import java.util.Random;
 
 public class Biter extends Monster {
 
@@ -13,9 +20,9 @@ public class Biter extends Monster {
     public Biter(int level) {
         super();
         this.position = new PositionComponent(this);
-        this.hp = Math.round(15*(1+(level/10)));
-        this.xp = Math.round(10*(1+(level/10)));
-        this.dmg = Math.round(2*(1+(level/10)));
+        this.hp = Math.round(15*(1+(level/10)-0.1f));
+        this.xp = Math.round(10*(1+(level/10)-0.1f));
+        this.dmg = Math.round(2*(1+(level/10)-0.1f));
         this.dmgType = 0;
         this.speed[0] = 0.1f;
         this.speed[1] = 0.1f;
@@ -25,7 +32,32 @@ public class Biter extends Monster {
         this.pathToRunRight = "monster/type1/runRight";
         setupVelocityComponent();
         setupAnimationComponent();
+        setupHitboxComponent();
         this.ai = new AIComponent(this);
+        monsterMoveStrategy();
+        this.ai.execute();
+    }
+
+    private void monsterMoveStrategy() {
+        Random rnd = new Random();
+        int strategy = rnd.nextInt(4);
+        int radius = rnd.nextInt(8)+2;
+        int checkPoints = rnd.nextInt(3)+2;
+        int pauseTime = rnd.nextInt(5)+1;
+        switch(strategy) {
+            case 0:
+                this.ai.setIdleAI(new PatrouilleWalk(radius, checkPoints, pauseTime, PatrouilleWalk.MODE.LOOP));
+                break;
+            case 1:
+                this.ai.setIdleAI(new Idle());
+                break;
+            case 2:
+                this.ai.setIdleAI(new RadiusWalk(radius, pauseTime));
+                break;
+            case 3:
+                this.ai.setIdleAI(new StaticRadiusWalk(radius, pauseTime));
+                break;
+        }
     }
 
     private void setupVelocityComponent() {
@@ -38,6 +70,13 @@ public class Biter extends Monster {
         Animation idleRight = AnimationBuilder.buildAnimation(pathToIdleRight);
         Animation idleLeft = AnimationBuilder.buildAnimation(pathToIdleLeft);
         new AnimationComponent(this, idleLeft, idleRight);
+    }
+
+    private void setupHitboxComponent() {
+        new HitboxComponent(
+            this,
+            (you, other, direction) -> System.out.println("BiterCollisionEnter"),
+            (you, other, direction) -> System.out.println("BiterCollisionLeave"));
     }
 
 }
