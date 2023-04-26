@@ -10,6 +10,8 @@ import ecs.components.ai.idle.Idle;
 import ecs.components.ai.idle.PatrouilleWalk;
 import ecs.components.ai.idle.RadiusWalk;
 import ecs.components.ai.idle.StaticRadiusWalk;
+import ecs.items.ItemData;
+import ecs.items.ItemDataGenerator;
 import graphic.Animation;
 
 import java.util.Random;
@@ -51,6 +53,7 @@ public class Zombie extends Monster {
         this.ai = new AIComponent(this);
         monsterMoveStrategy();
         this.ai.execute();
+        setItem();
     }
 
     private void monsterMoveStrategy() {
@@ -92,6 +95,24 @@ public class Zombie extends Monster {
             this,
             (you, other, direction) -> System.out.println("ZombieCollisionEnter"),
             (you, other, direction) -> System.out.println("ZombieCollisionLeave"));
+    }
+
+    private void setItem() {
+        ItemDataGenerator itm = new ItemDataGenerator();
+        int rnd = new Random().nextInt(itm.getAllItems().size());
+        this.item = itm.getItem(rnd);
+    }
+
+    /**
+     <b><span style="color: rgba(3,71,134,1);">Monster Loot</span></b><br>
+     Rückgabe Monster Loot
+     @return ItemData Zufälliges Item
+     @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+     @version cycle_1
+     @since 26.04.2023
+     */
+    public ItemData onDeath() {
+        return this.item;
     }
 
 }
