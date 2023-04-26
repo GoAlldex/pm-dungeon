@@ -89,4 +89,15 @@ public class InventoryComponent extends Component {
     public List<ItemData> getItems() {
         return new ArrayList<>(inventory);
     }
+
+    public void printAllItems() {
+        int s = 0;
+        System.out.println("Inventar");
+        System.out.println("_______________________________");
+        for(ItemData i : getItems()) {
+            System.out.println("Item Slot "+s+": "+i.getItemName());
+            s++;
+        }
+        System.out.println("_______________________________");
+    }
 }

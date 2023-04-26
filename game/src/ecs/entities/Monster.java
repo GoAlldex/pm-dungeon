@@ -2,6 +2,7 @@ package ecs.entities;
 
 import ecs.components.*;
 import ecs.components.ai.AIComponent;
+import ecs.items.ItemData;
 
 /**
  <b><span style="color: rgba(3,71,134,1);">Unsere Grund Monsterklasse, die alle Monster erben.</span></b><br>
@@ -34,6 +35,7 @@ public abstract class Monster extends Entity {
     protected String pathToRunLeft;
     protected String pathToRunRight;
     protected AIComponent ai;
+    protected ItemData item;
 
     /**
      <b><span style="color: rgba(3,71,134,1);">Monster HP Menge</span></b><br>
