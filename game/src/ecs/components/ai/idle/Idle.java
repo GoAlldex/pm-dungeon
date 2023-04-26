@@ -7,13 +7,25 @@ import level.elements.tile.Tile;
 import starter.Game;
 import tools.Point;
 
-public class Idle implements IIdleAI {
+/**
+ <b><span style="color: rgba(3,71,134,1);">Idle AI Strategie.</span></b><br>
+ Hier wird der Idle Zustand einer Entity definiert.<br><br>
 
+ @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+ @version cycle_1
+ @since 26.04.2023
+ */
+public class Idle implements IIdleAI {
 
     private boolean initialized = false;
 
     /**
-     * Idle Stays still
+     <b><span style="color: rgba(3,71,134,1);">Konstruktor</span></b><br>
+     Nicht benötigt, da sich die Entity passiv verhalten soll.<br><br>
+
+     @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+     @version cycle_1
+     @since 26.04.2023
      */
     public Idle() {}
 

@@ -14,9 +14,24 @@ import graphic.Animation;
 
 import java.util.Random;
 
+/**
+ <b><span style="color: rgba(3,71,134,1);">Unsere Monsterklasse "Kleiner Drache".</span></b><br>
+ Hier werden die wichtigesten bestandteile unseres Monsters "Kleiner Drache" initialisiert.<br><br>
+
+ @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+ @version cycle_1
+ @since 26.04.2023
+ */
 public class LittleDragon extends Monster {
 
-    /** Entity with Components */
+    /**
+     <b><span style="color: rgba(3,71,134,1);">Konstruktor</span></b><br>
+     Initialisiert ein neues Monster "Kleiner Drache".
+     @param level Typ des Monsters
+     @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+     @version cycle_1
+     @since 26.04.2023
+     */
     public LittleDragon(int level) {
         super();
         this.position = new PositionComponent(this);

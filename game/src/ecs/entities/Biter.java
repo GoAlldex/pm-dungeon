@@ -14,9 +14,24 @@ import graphic.Animation;
 
 import java.util.Random;
 
+/**
+ <b><span style="color: rgba(3,71,134,1);">Unsere Monsterklasse "Beißer".</span></b><br>
+ Hier werden die wichtigesten bestandteile unseres Monsters "Beißer" initialisiert.<br><br>
+
+ @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+ @version cycle_1
+ @since 26.04.2023
+ */
 public class Biter extends Monster {
 
-    /** Entity with Components */
+    /**
+     <b><span style="color: rgba(3,71,134,1);">Konstruktor</span></b><br>
+     Initialisiert ein neues Monster "Beißer".
+     @param level Typ des Monsters
+     @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+     @version cycle_1
+     @since 26.04.2023
+     */
     public Biter(int level) {
         super();
         this.position = new PositionComponent(this);
