@@ -16,6 +16,8 @@ import creature.trap.*;
 import ecs.components.MissingComponentException;
 import ecs.components.PositionComponent;
 import ecs.entities.*;
+import ecs.items.ItemDataGenerator;
+import ecs.items.WorldItemBuilder;
 import ecs.systems.*;
 import graphic.DungeonCamera;
 import graphic.Painter;
@@ -76,6 +78,7 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
     private static ArrayList<Monster> monster = new ArrayList<>();
     public int levelCounter = 0;
     private static final List<TrapGenerator> trapGenerators = new ArrayList<>();
+    private ArrayList<Entity> worldItems = new ArrayList<>();
 
     public static void main(String[] args) {
         // start the game
@@ -130,6 +133,7 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         manageEntitiesSets();
         getHero().ifPresent(this::loadNextLevelIfEntityIsOnEndTile);
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) togglePause();
+        hero.update(pauseMenu);
     }
 
     @Override
@@ -139,9 +143,10 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         currentLevel = levelAPI.getCurrentLevel();
         entities.clear();
         getHero().ifPresent(this::placeOnLevelStart);
-        int rnd = new Random().nextInt(1);
-        rnd++;
-        for(int i = 0; i < rnd; i++) {
+        Random rnd = new Random();
+        int rnd_mon_anz = rnd.nextInt(20);
+        rnd_mon_anz++;
+        for(int i = 0; i < rnd_mon_anz; i++) {
             int rnd_mon = new Random().nextInt(3);
             if(rnd_mon == 0) {
                 monster.add(new Biter(levelCounter));
@@ -150,6 +155,12 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
             } else {
                 monster.add(new LittleDragon(levelCounter));
             }
+        }
+        int rnd_itm_anz = rnd.nextInt(10);
+        rnd_itm_anz++;
+        ItemDataGenerator itm = new ItemDataGenerator();
+        for(int i = 0; i < rnd_itm_anz; i++) {
+            worldItems.add(WorldItemBuilder.buildWorldItem(itm.generateItemData(), currentLevel.getRandomFloorTile().getCoordinate().toPoint()));
         }
         int randomNumberTraps = new Random().nextInt(5);
         for (int i = 0; i < randomNumberTraps; i++) {
