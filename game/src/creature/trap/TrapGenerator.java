@@ -5,6 +5,7 @@ import ecs.components.PositionComponent;
 import ecs.entities.Entity;
 import graphic.Animation;
 import level.elements.tile.FloorTile;
+import level.elements.tile.WallTile;
 import level.tools.Coordinate;
 import tools.Point;
 
@@ -12,8 +13,8 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * @author Ayaz Khudhur
- * @version 1.0
+ * @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+ * @version cycle_1
  */
 public abstract class TrapGenerator extends Trap{
     //Get floor list
@@ -22,6 +23,8 @@ public abstract class TrapGenerator extends Trap{
     private PositionComponent position;
     //trap damage
     private final float dmg = 0.1f;
+
+    public static final String FLOORPATH = "dungeon/default/floor/";
 
     /**
      * Generate a random position

@@ -6,6 +6,7 @@ import ecs.components.HitboxComponent;
 import ecs.components.PositionComponent;
 import ecs.entities.Entity;
 import graphic.Animation;
+import level.LevelAPI;
 import level.elements.ILevel;
 import level.elements.tile.FloorTile;
 import level.elements.tile.Tile;
@@ -13,20 +14,24 @@ import level.elements.tile.WallTile;
 import level.generator.IGenerator;
 import level.generator.randomwalk.RandomWalkGenerator;
 import level.tools.Coordinate;
+import level.tools.LevelSize;
 import tools.Point;
 
 import java.util.List;
 import java.util.Random;
 
 public class TeleportTrap extends TrapGenerator{
-    private static final String teleportPath = "dungeon/default/floor/teleport.png";
-    private static final String illusionPath = "dungeon/default/floor/floor_1.png";
+    private static final String teleportPath = FLOORPATH + "teleport.png";
+    private static final String illusionPath = FLOORPATH + "floor_1.png";
 
-    public TeleportTrap(List<FloorTile> floorTiles){
+    private Entity entity;
+
+    public TeleportTrap(List<FloorTile> floorTiles, Entity entity){
         super();
+        this.entity = entity;
         setFloorTiles(floorTiles);
         generatePosition();
-        visibility(true);
+        visibility(false);
         placedSwitch(false);
         animation();
         setupHitboxComponent();
@@ -42,7 +47,6 @@ public class TeleportTrap extends TrapGenerator{
         if (visibility()) {
             Animation animation = AnimationBuilder.buildAnimation(teleportPath);
             new AnimationComponent(this, animation);
-            teleport();
             return animation;
         }else {
             return hiddenTrap();
@@ -59,8 +63,9 @@ public class TeleportTrap extends TrapGenerator{
             return showTrap();
         }
     }
-    private void teleport(){
-        IGenerator generator = new RandomWalkGenerator();
-        //System.out.println("Random walk generator: " + generator.getLevel().printLevel());
+
+    @Override
+    public void setupHitboxComponent() {
+        super.setupHitboxComponent();
     }
 }

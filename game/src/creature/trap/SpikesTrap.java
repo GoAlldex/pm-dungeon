@@ -14,7 +14,7 @@ public class SpikesTrap extends TrapGenerator{
         super();
         setFloorTiles(floorTiles);
         generatePosition();
-        visibility(true);
+        visibility(false);
         placedSwitch(false);
         animation();
         setupHitboxComponent();

@@ -12,14 +12,10 @@ import configuration.Configuration;
 import configuration.KeyboardConfig;
 import controller.AbstractController;
 import controller.SystemController;
-import creature.trap.SpikesTrap;
-import creature.trap.TeleportTrap;
-import creature.trap.Trap;
-import creature.trap.TrapGenerator;
+import creature.trap.*;
 import ecs.components.MissingComponentException;
 import ecs.components.PositionComponent;
-import ecs.entities.Entity;
-import ecs.entities.Hero;
+import ecs.entities.*;
 import ecs.systems.*;
 import graphic.DungeonCamera;
 import graphic.Painter;
@@ -77,6 +73,8 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
     private static PauseMenu<Actor> pauseMenu;
     private static Entity hero;
     private Logger gameLogger;
+    private static ArrayList<Monster> monster = new ArrayList<>();
+    public int levelCounter = 0;
     private static final List<TrapGenerator> trapGenerators = new ArrayList<>();
 
     public static void main(String[] args) {
@@ -123,9 +121,6 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         hero = new Hero();
         levelAPI = new LevelAPI(batch, painter, new WallGenerator(new RandomWalkGenerator()), this);
         levelAPI.loadLevel(LEVELSIZE);
-        //trapGenerator
-        trapGenerators.add(new SpikesTrap(currentLevel.getFloorTiles()));
-        trapGenerators.add(new TeleportTrap(currentLevel.getFloorTiles()));
         createSystems();
     }
 
@@ -139,9 +134,31 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
 
     @Override
     public void onLevelLoad() {
+        monster.clear();
+        trapGenerators.clear();
         currentLevel = levelAPI.getCurrentLevel();
         entities.clear();
         getHero().ifPresent(this::placeOnLevelStart);
+        int rnd = new Random().nextInt(1);
+        rnd++;
+        for(int i = 0; i < rnd; i++) {
+            int rnd_mon = new Random().nextInt(3);
+            if(rnd_mon == 0) {
+                monster.add(new Biter(levelCounter));
+            } else if(rnd_mon == 1) {
+                monster.add(new Zombie(levelCounter));
+            } else {
+                monster.add(new LittleDragon(levelCounter));
+            }
+        }
+        int randomNumberTraps = new Random().nextInt(5);
+        for (int i = 0; i < randomNumberTraps; i++) {
+            //trapGenerator
+            trapGenerators.add(new SpikesTrap(currentLevel.getFloorTiles()));
+            trapGenerators.add(new TeleportTrap(currentLevel.getFloorTiles(), hero));
+            trapGenerators.add(new SpawnTrap(currentLevel.getFloorTiles(), levelCounter));
+        }
+
         getTraps().ifPresent(this::placeForTraps);
     }
 
@@ -223,6 +240,15 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
                                 .orElseThrow(
                                         () -> new MissingComponentException("PositionComponent"));
         pc.setPosition(currentLevel.getStartTile().getCoordinate().toPoint());
+        for(Monster m : monster) {
+            entities.add(m);
+            PositionComponent npc =
+                (PositionComponent)
+                    m.getComponent(PositionComponent.class)
+                        .orElseThrow(
+                            () -> new MissingComponentException("PositionComponent"));
+            npc.setPosition(currentLevel.getRandomFloorTile().getCoordinate().toPoint());
+        }
     }
 
     /** Toggle between pause and run */

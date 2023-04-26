@@ -3,17 +3,20 @@ package creature.trap;
 import ecs.components.PositionComponent;
 import ecs.entities.Entity;
 import graphic.Animation;
+import level.elements.tile.FloorTile;
+
+import java.util.List;
 
 /**
- *
- * @author Ayaz Khudhur
- * @version 1.0
+ * @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+ * @version cycle_1
  */
 public abstract class Trap extends Entity{
     private PositionComponent position; //Component position
     private boolean visibility; //trap visibility
     private Animation worldAnimation; //Trap animation
     private boolean placedSwitch; //trap switch position
+    private boolean trigegr;
 
     /**
      * @param entity set entity position
@@ -70,4 +73,13 @@ public abstract class Trap extends Entity{
     public Animation animation(){
         return worldAnimation;
     }
+
+    public void setTrigegr(boolean trigegr){
+        this.trigegr = trigegr;
+    }
+
+    public boolean isTrigegr(){
+        return trigegr;
+    }
+
 }
