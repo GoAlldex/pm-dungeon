@@ -12,6 +12,10 @@ import configuration.Configuration;
 import configuration.KeyboardConfig;
 import controller.AbstractController;
 import controller.SystemController;
+import creature.trap.SpikesTrap;
+import creature.trap.TeleportTrap;
+import creature.trap.Trap;
+import creature.trap.TrapGenerator;
 import ecs.components.MissingComponentException;
 import ecs.components.PositionComponent;
 import ecs.entities.Entity;
@@ -73,6 +77,7 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
     private static PauseMenu<Actor> pauseMenu;
     private static Entity hero;
     private Logger gameLogger;
+    private static final List<TrapGenerator> trapGenerators = new ArrayList<>();
 
     public static void main(String[] args) {
         // start the game
@@ -118,6 +123,9 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         hero = new Hero();
         levelAPI = new LevelAPI(batch, painter, new WallGenerator(new RandomWalkGenerator()), this);
         levelAPI.loadLevel(LEVELSIZE);
+        //trapGenerator
+        trapGenerators.add(new SpikesTrap(currentLevel.getFloorTiles()));
+        trapGenerators.add(new TeleportTrap(currentLevel.getFloorTiles()));
         createSystems();
     }
 
@@ -134,6 +142,34 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         currentLevel = levelAPI.getCurrentLevel();
         entities.clear();
         getHero().ifPresent(this::placeOnLevelStart);
+        getTraps().ifPresent(this::placeForTraps);
+    }
+
+    public static Optional<Entity> getTraps() {
+        if (trapGenerators.size() > 0) {
+            for (TrapGenerator trapGenerator : trapGenerators) {
+                return Optional.ofNullable(trapGenerator);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private void placeForTraps(Entity entity){
+        for (TrapGenerator trap : trapGenerators) {
+            if (trap.visibility())
+                trap.visibility(false);
+        }
+        entities.addAll(trapGenerators);
+        for (TrapGenerator trap : trapGenerators) {
+            PositionComponent pc =
+                (PositionComponent)
+                    trap.getComponent(PositionComponent.class)
+                        .orElseThrow(
+                            () -> new MissingComponentException("PositionComponent"));
+            trap.setFloorTiles(currentLevel.getFloorTiles());
+            trap.generatePosition();
+            pc.setPosition(trap.position().getPosition());
+        }
     }
 
     private void manageEntitiesSets() {
