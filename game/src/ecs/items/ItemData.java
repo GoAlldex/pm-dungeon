@@ -44,8 +44,8 @@ public class ItemData {
      */
     public ItemData(
             ItemType itemType,
-            Animation inventoryTexture,
             Animation worldTexture,
+            Animation inventoryTexture,
             String itemName,
             String description,
             IOnCollect onCollect,
@@ -74,14 +74,14 @@ public class ItemData {
      */
     public ItemData(
             ItemType itemType,
-            Animation inventoryTexture,
             Animation worldTexture,
+            Animation inventoryTexture,
             String itemName,
             String description) {
         this(
                 itemType,
-                inventoryTexture,
                 worldTexture,
+                inventoryTexture,
                 itemName,
                 description,
                 ItemData::defaultCollect,
