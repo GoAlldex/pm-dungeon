@@ -52,7 +52,7 @@ public class Switch extends Entity{
     public void trap(){
         new HitboxComponent(
             this,
-            (you, other, direction) -> trap.setTrigegr(true),
+            (you, other, direction) -> trap.setTrigger(true),
             (you, other, direction) -> System.out.println("Leave..." + getClass().getSimpleName())
         );
     }

@@ -5,7 +5,6 @@ import ecs.components.PositionComponent;
 import ecs.entities.Entity;
 import graphic.Animation;
 import level.elements.tile.FloorTile;
-import level.elements.tile.WallTile;
 import level.tools.Coordinate;
 import tools.Point;
 
@@ -21,10 +20,12 @@ public abstract class TrapGenerator extends Trap{
     private List<FloorTile> floorTiles;
     //default position
     private PositionComponent position;
+
     //trap damage
     private final float dmg = 0.1f;
 
     public static final String FLOORPATH = "dungeon/default/floor/";
+    public static final String ILLUSIONPATH = FLOORPATH + "floor_1.png";
 
     /**
      * Generate a random position
@@ -57,21 +58,12 @@ public abstract class TrapGenerator extends Trap{
     @Override
     public void visibility(boolean visibility) {
         super.visibility(visibility);
-        showTrap();
-        hiddenTrap();
     }
 
     /**
      * @return return the trap animation
      */
     public Animation showTrap(){
-        return null;
-    }
-
-    /**
-     * @return a new Animation for Illusion trap
-     */
-    public Animation hiddenTrap(){
         return null;
     }
 
@@ -109,4 +101,5 @@ public abstract class TrapGenerator extends Trap{
     public float getDmg(){
         return dmg;
     }
+
 }

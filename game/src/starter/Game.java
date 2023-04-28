@@ -75,10 +75,10 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
     private static PauseMenu<Actor> pauseMenu;
     private static Entity hero;
     private Logger gameLogger;
-    private static ArrayList<Monster> monster = new ArrayList<>();
+    private static final ArrayList<Monster> monster = new ArrayList<>();
     public int levelCounter = 0;
     private static final List<TrapGenerator> trapGenerators = new ArrayList<>();
-    private ArrayList<Entity> worldItems = new ArrayList<>();
+    private final ArrayList<Entity> worldItems = new ArrayList<>();
 
     public static void main(String[] args) {
         // start the game
@@ -114,7 +114,7 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         setupCameras();
         painter = new Painter(batch, camera);
         generator = new RandomWalkGenerator();
-        levelAPI = new LevelAPI(batch, painter, generator, this);
+        //levelAPI = new LevelAPI(batch, painter, generator, this);
         initBaseLogger();
         gameLogger = Logger.getLogger(this.getClass().getName());
         systems = new SystemController();
@@ -138,14 +138,15 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
 
     @Override
     public void onLevelLoad() {
+        levelCounter++;
         monster.clear();
         trapGenerators.clear();
         currentLevel = levelAPI.getCurrentLevel();
         entities.clear();
         getHero().ifPresent(this::placeOnLevelStart);
         Random rnd = new Random();
-        int rnd_mon_anz = rnd.nextInt(20);
-        rnd_mon_anz++;
+        int rnd_mon_anz = rnd.nextInt(1);
+        //rnd_mon_anz++;
         for(int i = 0; i < rnd_mon_anz; i++) {
             int rnd_mon = new Random().nextInt(3);
             if(rnd_mon == 0) {
@@ -156,20 +157,20 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
                 monster.add(new LittleDragon(levelCounter));
             }
         }
-        int rnd_itm_anz = rnd.nextInt(10);
+        int rnd_itm_anz = rnd.nextInt(1);
         rnd_itm_anz++;
         ItemDataGenerator itm = new ItemDataGenerator();
         for(int i = 0; i < rnd_itm_anz; i++) {
             worldItems.add(WorldItemBuilder.buildWorldItem(itm.generateItemData(), currentLevel.getRandomFloorTile().getCoordinate().toPoint()));
         }
+        //Traps
         int randomNumberTraps = new Random().nextInt(5);
-        for (int i = 0; i < randomNumberTraps; i++) {
+        for (int i = 0; i <= randomNumberTraps; i++) {
             //trapGenerator
-            trapGenerators.add(new SpikesTrap(currentLevel.getFloorTiles()));
-            trapGenerators.add(new TeleportTrap(currentLevel.getFloorTiles(), hero));
+            trapGenerators.add(new SpikesTrap(currentLevel.getFloorTiles(), levelCounter));
+            trapGenerators.add(new TeleportTrap(currentLevel.getFloorTiles()));
             trapGenerators.add(new SpawnTrap(currentLevel.getFloorTiles(), levelCounter));
         }
-
         getTraps().ifPresent(this::placeForTraps);
     }
 

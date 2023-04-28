@@ -4,46 +4,48 @@ import dslToGame.AnimationBuilder;
 import ecs.components.*;
 import graphic.Animation;
 import level.elements.tile.FloorTile;
+
 import java.util.List;
 
 public class SpikesTrap extends TrapGenerator{
-    private static final String illusionPath = "dungeon/default/floor/floor_1.png";
     private static final String visibilityPath ="dungeon/default/floor/spikes.png";
+    private int levelCounter;
 
-    public SpikesTrap(List<FloorTile> floorTiles){
+    public SpikesTrap(List<FloorTile> floorTiles, int levelCounter){
         super();
+        this.levelCounter = levelCounter;
         setFloorTiles(floorTiles);
         generatePosition();
-        visibility(false);
+        visibility(true);
         placedSwitch(false);
-        animation();
+        new AnimationComponent(this, animation());
         setupHitboxComponent();
     }
 
     @Override
     public Animation animation(){
-        return visibility() ?  showTrap() : hiddenTrap();
+        return visibility() ?  showTrap() : AnimationBuilder.buildAnimation(ILLUSIONPATH);
     }
 
     @Override
     public Animation showTrap(){
-        if (visibility()){
-            Animation animation = AnimationBuilder.buildAnimation(visibilityPath);
-            new AnimationComponent(this, animation);
-            return animation;
-        }else{
-            return hiddenTrap();
-        }
+        Animation animation = new Animation(AnimationBuilder.buildAnimation(visibilityPath).getAnimationFrames(), 1);
+        AnimationComponent component = new AnimationComponent(this, animation);
+        return animation;
     }
 
     @Override
-    public Animation hiddenTrap(){
-        if (!visibility()){
-            Animation animation = AnimationBuilder.buildAnimation(illusionPath);
-            new AnimationComponent(this, animation);
-            return animation;
-        }else{
-            return showTrap();
-        }
+    public void setupHitboxComponent() {
+        new HitboxComponent(
+            this,
+            (a,b,direction) -> spikes(),
+            (a,b,direction) -> System.out.println("Leave..."+SpikesTrap.class)
+        );
+    }
+
+    private void spikes() {
+        visibility(true);
+        showTrap();
+        System.out.println("Damage: " + getDmg() * 0.2f * levelCounter);
     }
 }
