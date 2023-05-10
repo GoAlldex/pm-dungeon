@@ -1,10 +1,7 @@
 package ecs.entities;
 
 import dslToGame.AnimationBuilder;
-import ecs.components.AnimationComponent;
-import ecs.components.HitboxComponent;
-import ecs.components.PositionComponent;
-import ecs.components.VelocityComponent;
+import ecs.components.*;
 import ecs.components.ai.AIComponent;
 import ecs.components.ai.idle.Idle;
 import ecs.components.ai.idle.PatrouilleWalk;
@@ -37,7 +34,9 @@ public class Biter extends Monster {
     public Biter(int level) {
         super();
         this.position = new PositionComponent(this);
-        this.hp = Math.round(15*(1+(level/10)-0.1f));
+        onDeath();
+        //this.hp = Math.round(15f*(1f+(level/10f)-0.1f));
+        this.hp = new HealthComponent(this, Math.round(15f*(1f+((float)level/10f)-0.1f)), this.death, null, null);
         this.xp = Math.round(10*(1+(level/10)-0.1f));
         this.dmg = Math.round(2*(1+(level/10)-0.1f));
         this.dmgType = 0;
@@ -111,8 +110,13 @@ public class Biter extends Monster {
      @version cycle_1
      @since 26.04.2023
      */
-    public ItemData onDeath() {
-        return this.item;
+    public void onDeath() {
+        this.death = new IOnDeathFunction() {
+            @Override
+            public void onDeath(Entity entity) {
+
+            }
+        };
     }
 
 }

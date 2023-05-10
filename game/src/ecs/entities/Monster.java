@@ -24,7 +24,7 @@ import ecs.items.ItemData;
  */
 public abstract class Monster extends Entity {
 
-    protected int hp;
+    protected HealthComponent hp;
     protected long xp;
     protected int dmg;
     protected int dmgType;
@@ -36,6 +36,7 @@ public abstract class Monster extends Entity {
     protected String pathToRunRight;
     protected AIComponent ai;
     protected ItemData item;
+    protected IOnDeathFunction death;
 
     /**
      <b><span style="color: rgba(3,71,134,1);">Monster HP Menge</span></b><br>
@@ -46,7 +47,7 @@ public abstract class Monster extends Entity {
      @since 26.04.2023
      */
     public int getHp() {
-        return this.hp;
+        return this.hp.getCurrentHealthpoints();
     }
 
     /**
