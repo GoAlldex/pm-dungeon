@@ -53,6 +53,10 @@ public class HitboxComponent extends Component {
         this(entity, DEFAULT_OFFSET, DEFAULT_SIZE, iCollideEnter, iCollideLeave);
     }
 
+    public HitboxComponent(Entity entity, ICollide iCollideEnter) {
+        this(entity, DEFAULT_OFFSET, DEFAULT_SIZE, iCollideEnter, iCollideEnter);
+    }
+
     /**
      * Creates A Hitbox with a default offset of 0.25f x 0.25f and a default size of 0.5f x 0.5f and
      * defaultCollideMethods

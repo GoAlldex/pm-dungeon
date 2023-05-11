@@ -16,8 +16,6 @@ import creature.trap.*;
 import ecs.components.MissingComponentException;
 import ecs.components.PositionComponent;
 import ecs.entities.*;
-import ecs.entities.boss.Boss;
-import ecs.entities.boss.ZombieBoss;
 import ecs.items.ItemDataGenerator;
 import ecs.items.WorldItemBuilder;
 import ecs.systems.*;
@@ -81,7 +79,6 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
     public int levelCounter = 0;
     private static final List<TrapGenerator> trapGenerators = new ArrayList<>();
     private ArrayList<Entity> worldItems = new ArrayList<>();
-    private ZombieBoss boss;
 
     public static void main(String[] args) {
         // start the game
@@ -141,12 +138,10 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
 
     @Override
     public void onLevelLoad() {
-        levelCounter++;
         monster.clear();
         trapGenerators.clear();
         currentLevel = levelAPI.getCurrentLevel();
         entities.clear();
-        boss = new ZombieBoss(levelCounter, hero);
         getHero().ifPresent(this::placeOnLevelStart);
         Random rnd = new Random();
         int rnd_mon_anz = rnd.nextInt(20);
@@ -154,26 +149,27 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         for(int i = 0; i < rnd_mon_anz; i++) {
             int rnd_mon = new Random().nextInt(3);
             if(rnd_mon == 0) {
-                //monster.add(new Biter(levelCounter));
+                monster.add(new Biter(levelCounter));
             } else if(rnd_mon == 1) {
-                //monster.add(new Zombie(levelCounter));
+                monster.add(new Zombie(levelCounter));
             } else {
-                //monster.add(new LittleDragon(levelCounter));
+                monster.add(new LittleDragon(levelCounter));
             }
         }
         int rnd_itm_anz = rnd.nextInt(10);
         rnd_itm_anz++;
         ItemDataGenerator itm = new ItemDataGenerator();
         for(int i = 0; i < rnd_itm_anz; i++) {
-            //worldItems.add(WorldItemBuilder.buildWorldItem(itm.generateItemData(), currentLevel.getRandomFloorTile().getCoordinate().toPoint()));
+            worldItems.add(WorldItemBuilder.buildWorldItem(itm.generateItemData(), currentLevel.getRandomFloorTile().getCoordinate().toPoint()));
         }
         int randomNumberTraps = new Random().nextInt(5);
         for (int i = 0; i < randomNumberTraps; i++) {
             //trapGenerator
-            //trapGenerators.add(new SpikesTrap(currentLevel.getFloorTiles()));
-            //trapGenerators.add(new TeleportTrap(currentLevel.getFloorTiles(), hero));
-            //trapGenerators.add(new SpawnTrap(currentLevel.getFloorTiles(), levelCounter));
+            trapGenerators.add(new SpikesTrap(currentLevel.getFloorTiles()));
+            trapGenerators.add(new TeleportTrap(currentLevel.getFloorTiles(), hero));
+            trapGenerators.add(new SpawnTrap(currentLevel.getFloorTiles(), levelCounter));
         }
+
         getTraps().ifPresent(this::placeForTraps);
     }
 
@@ -264,15 +260,6 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
                             () -> new MissingComponentException("PositionComponent"));
             npc.setPosition(currentLevel.getRandomFloorTile().getCoordinate().toPoint());
         }
-        entities.add(boss);
-        PositionComponent bossPosition =
-            (PositionComponent)
-            boss.getComponent(PositionComponent.class)
-                .orElseThrow(
-                    () -> new MissingComponentException("PositionComponent Boss")
-                );
-        bossPosition.setPosition(currentLevel.getRandomFloorTile().getCoordinate().toPoint());
-        boss.setPosition(bossPosition);
     }
 
     /** Toggle between pause and run */

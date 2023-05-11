@@ -13,6 +13,9 @@ import ecs.items.ItemDataGenerator;
 import graphic.Animation;
 import graphic.hud.PauseMenu;
 
+import java.util.ArrayList;
+import java.util.Set;
+
 /**
  * The Hero is the player character. It's entity in the ECS. This class helps to setup the hero with
  * all its components and attributes .
@@ -30,13 +33,17 @@ public class Hero extends Entity {
     private Skill firstSkill;
 
     private InventoryComponent inventory;
-    private boolean inventoryOpen = false;
     int cd = 30;
+    private HealthComponent hp;
+    private IOnDeathFunction death;
+    private PositionComponent position;
 
     /** Entity with Components */
     public Hero() {
         super();
-        new PositionComponent(this);
+        this.position = new PositionComponent(this);
+        onDeath();
+        this.hp = new HealthComponent(this, 100, this.death, null, null);
         setupVelocityComponent();
         setupAnimationComponent();
         setupHitboxComponent();
@@ -78,20 +85,33 @@ public class Hero extends Entity {
         this.inventory.addItem(itm.getItem(1));
     }
     @Override
-    public void update(PauseMenu<Actor> pauseMenu) {
-        if(cd != 30) {
-            cd++;
-        }
-        if(Gdx.input.isKeyPressed(Input.Keys.B) && !inventoryOpen && cd == 30) {
-            cd = 0;
-            this.inventoryOpen = true;
-            pauseMenu.showMenu();
-            this.inventory.printAllItems();
-        } else if(Gdx.input.isKeyPressed(Input.Keys.B) && inventoryOpen && cd == 30) {
-            cd = 0;
-            this.inventoryOpen = false;
-            pauseMenu.hideMenu();
-        }
+    public void update() {
+
+    }
+    @Override
+    public InventoryComponent getInventory() {
+        return this.inventory;
+    }
+
+    public void onDeath() {
+        this.death = new IOnDeathFunction() {
+            @Override
+            public void onDeath(Entity entity) {
+
+            }
+        };
+    }
+
+    /**
+     <b><span style="color: rgba(3,71,134,1);">Position</span></b><br>
+     Position des Helden im Dungeon Level.
+     @return PositionComponent gibt die Position des Helden zurück
+     @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+     @version cycle_2
+     @since 08.05.2023
+     */
+    public PositionComponent getPosition() {
+        return position;
     }
 
 }

@@ -2,10 +2,14 @@ package ecs.entities;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import ecs.components.Component;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Logger;
 
+import ecs.components.InventoryComponent;
 import graphic.hud.PauseMenu;
 import semanticAnalysis.types.DSLContextPush;
 import semanticAnalysis.types.DSLType;
@@ -55,5 +59,13 @@ public class Entity {
         return Optional.ofNullable(components.get(klass));
     }
 
-    public void update(PauseMenu<Actor> pauseMenu){};
+    public void update(Set<Entity> entities){};
+
+    public void update(Set<Entity> entities, int level){};
+
+    public void update(){};
+
+    public InventoryComponent getInventory() {
+        return null;
+    };
 }

@@ -1,11 +1,17 @@
 package ecs.components;
 
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import ecs.entities.Entity;
 import ecs.items.ItemData;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
+
+import graphic.Animation;
 import logging.CustomLogLevel;
+import tools.Point;
 
 /** Allows an Entity to carry Items */
 public class InventoryComponent extends Component {
@@ -13,6 +19,7 @@ public class InventoryComponent extends Component {
     private List<ItemData> inventory;
     private int maxSize;
     private final Logger inventoryLogger = Logger.getLogger(this.getClass().getName());
+    private static final String inventoryTex = "inventory/ui_bag_empty.png";
 
     /**
      * creates a new InventoryComponent
@@ -90,6 +97,10 @@ public class InventoryComponent extends Component {
         return new ArrayList<>(inventory);
     }
 
+    public ItemData getItem(int item) {
+        return inventory.get(item);
+    }
+
     public void printAllItems() {
         int s = 0;
         System.out.println("Inventar");
@@ -100,4 +111,9 @@ public class InventoryComponent extends Component {
         }
         System.out.println("_______________________________");
     }
+
+    public String getTexture() {
+        return this.inventoryTex;
+    }
+
 }

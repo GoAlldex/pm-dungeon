@@ -7,74 +7,49 @@ import ecs.components.ai.idle.Idle;
 import ecs.components.ai.idle.PatrouilleWalk;
 import ecs.components.ai.idle.RadiusWalk;
 import ecs.components.ai.idle.StaticRadiusWalk;
-import ecs.items.ItemData;
 import ecs.items.ItemDataGenerator;
 import graphic.Animation;
 
 import java.util.Random;
 
 /**
- <b><span style="color: rgba(3,71,134,1);">Unsere Monsterklasse "Kleiner Drache".</span></b><br>
- Hier werden die wichtigesten bestandteile unseres Monsters "Kleiner Drache" initialisiert.<br><br>
+ <b><span style="color: rgba(3,71,134,1);">Unsere Monsterklasse "Skelett".</span></b><br>
+ Hier werden die wichtigesten bestandteile unseres Monsters "Skelett" initialisiert.<br><br>
 
  @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
- @version cycle_1
- @since 26.04.2023
+ @version cycle_2
+ @since 10.05.2023
  */
-public class LittleDragon extends Monster {
+public class Skeleton extends Monster {
 
     /**
      <b><span style="color: rgba(3,71,134,1);">Konstruktor</span></b><br>
-     Initialisiert ein neues Monster "Kleiner Drache".
+     Initialisiert ein neues Monster "Skelett".
      @param level Typ des Monsters
      @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
-     @version cycle_1
-     @since 26.04.2023
+     @version cycle_2
+     @since 10.05.2023
      */
-    public LittleDragon(int level) {
+    public Skeleton(int level) {
         super();
         this.position = new PositionComponent(this);
         onDeath();
-        //this.hp = Math.round(40*(1+(level/10)-0.1f));
-        this.hp = new HealthComponent(this, Math.round(40f*(1f+((float)level/10f)-0.1f)), this.death, null, null);
-        this.xp = Math.round(30*(1+(level/10)-0.1f));
-        this.dmg = Math.round(7*(1+(level/10)-0.1f));
+        this.hp = new HealthComponent(this, Math.round(25f*(1f+((float)level/10f)-0.1f)), this.death, null, null);
+        this.xp = Math.round(10*(1+(level/10)-0.1f));
+        this.dmg = Math.round(2*(1+(level/10)-0.1f));
         this.dmgType = 0;
-        this.speed[0] = 0.2f;
-        this.speed[1] = 0.2f;
-        this.pathToIdleLeft = "monster/type3/idleLeft";
-        this.pathToIdleRight = "monster/type3/idleRight";
-        this.pathToRunLeft = "monster/type3/runLeft";
-        this.pathToRunRight = "monster/type3/runRight";
+        this.speed[0] = 0.3f;
+        this.speed[1] = 0.3f;
+        this.pathToIdleLeft = "monster/type4/idleLeft";
+        this.pathToIdleRight = "monster/type4/idleRight";
+        this.pathToRunLeft = "monster/type4/runLeft";
+        this.pathToRunRight = "monster/type4/runRight";
         setupVelocityComponent();
         setupAnimationComponent();
         setupHitboxComponent();
         this.ai = new AIComponent(this);
-        monsterMoveStrategy();
         this.ai.execute();
         setItem();
-    }
-
-    private void monsterMoveStrategy() {
-        Random rnd = new Random();
-        int strategy = rnd.nextInt(4);
-        int radius = rnd.nextInt(8)+2;
-        int checkPoints = rnd.nextInt(3)+2;
-        int pauseTime = rnd.nextInt(5)+1;
-        switch(strategy) {
-            case 0:
-                this.ai.setIdleAI(new PatrouilleWalk(radius, checkPoints, pauseTime, PatrouilleWalk.MODE.LOOP));
-                break;
-            case 1:
-                this.ai.setIdleAI(new Idle());
-                break;
-            case 2:
-                this.ai.setIdleAI(new RadiusWalk(radius, pauseTime));
-                break;
-            case 3:
-                this.ai.setIdleAI(new StaticRadiusWalk(radius, pauseTime));
-                break;
-        }
     }
 
     private void setupVelocityComponent() {
@@ -92,8 +67,8 @@ public class LittleDragon extends Monster {
     private void setupHitboxComponent() {
         new HitboxComponent(
             this,
-            (you, other, direction) -> System.out.println("LittleDragonCollisionEnter"),
-            (you, other, direction) -> System.out.println("LittleDragonCollisionLeave"));
+            (you, other, direction) -> System.out.println("SkelettCollisionEnter"),
+            (you, other, direction) -> System.out.println("SkelettCollisionLeave"));
     }
 
     private void setItem() {
@@ -107,8 +82,8 @@ public class LittleDragon extends Monster {
      Rückgabe Monster Loot
      @return ItemData Zufälliges Item
      @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
-     @version cycle_1
-     @since 26.04.2023
+     @version cycle_2
+     @since 10.05.2023
      */
     public void onDeath() {
         this.death = new IOnDeathFunction() {
@@ -117,6 +92,10 @@ public class LittleDragon extends Monster {
 
             }
         };
+    }
+
+    public void setToTomb(PositionComponent position) {
+        this.position = new PositionComponent(this, position.getPosition());
     }
 
 }
