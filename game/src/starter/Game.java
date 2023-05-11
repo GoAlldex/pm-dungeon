@@ -136,7 +136,7 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         manageEntitiesSets();
         getHero().ifPresent(this::loadNextLevelIfEntityIsOnEndTile);
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) togglePause();
-        hero.update(pauseMenu);
+        //hero.update(pauseMenu);
     }
 
     @Override
@@ -154,25 +154,25 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         for(int i = 0; i < rnd_mon_anz; i++) {
             int rnd_mon = new Random().nextInt(3);
             if(rnd_mon == 0) {
-                //monster.add(new Biter(levelCounter));
+                monster.add(new Biter(levelCounter));
             } else if(rnd_mon == 1) {
-                //monster.add(new Zombie(levelCounter));
+                monster.add(new Zombie(levelCounter));
             } else {
-                //monster.add(new LittleDragon(levelCounter));
+                monster.add(new LittleDragon(levelCounter));
             }
         }
         int rnd_itm_anz = rnd.nextInt(10);
         rnd_itm_anz++;
         ItemDataGenerator itm = new ItemDataGenerator();
         for(int i = 0; i < rnd_itm_anz; i++) {
-            //worldItems.add(WorldItemBuilder.buildWorldItem(itm.generateItemData(), currentLevel.getRandomFloorTile().getCoordinate().toPoint()));
+            worldItems.add(WorldItemBuilder.buildWorldItem(itm.generateItemData(), currentLevel.getRandomFloorTile().getCoordinate().toPoint()));
         }
         int randomNumberTraps = new Random().nextInt(5);
         for (int i = 0; i < randomNumberTraps; i++) {
             //trapGenerator
-            //trapGenerators.add(new SpikesTrap(currentLevel.getFloorTiles()));
-            //trapGenerators.add(new TeleportTrap(currentLevel.getFloorTiles(), hero));
-            //trapGenerators.add(new SpawnTrap(currentLevel.getFloorTiles(), levelCounter));
+            trapGenerators.add(new SpikesTrap(currentLevel.getFloorTiles()));
+            trapGenerators.add(new TeleportTrap(currentLevel.getFloorTiles(), hero));
+            trapGenerators.add(new SpawnTrap(currentLevel.getFloorTiles(), levelCounter));
         }
         getTraps().ifPresent(this::placeForTraps);
     }

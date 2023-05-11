@@ -104,7 +104,7 @@ public class Zombie extends Monster {
     }
 
     public void setHp(int hp){
-        this.hp = hp;
+        this.hp.setCurrentHealthpoints(hp);
     }
 
     /**

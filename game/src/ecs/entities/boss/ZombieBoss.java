@@ -62,7 +62,7 @@ public class ZombieBoss extends Boss{
      */
     private void setup() {
         this.position = new PositionComponent(this);
-        this.hp = Math.round( (45 * getLevel()) * (1.5f + ((float) getLevel() / 10) - 0.1f));
+        this.hp = (Math.round( (45 * getLevel()) * (1.5f + ((float) getLevel() / 10) - 0.1f)));
         staticHPBalken = getHp();
         this.speed[0] = zombieDMG * 0.8f;
         this.speed[1] = zombieDMG * 0.8f;
@@ -178,9 +178,10 @@ public class ZombieBoss extends Boss{
             this,
             (you, other, direction) -> {
                 if (other != this && other == hero){
-                    this.hp -= getLevel() * 2.5f;
+                    int i = (int) (getHp() - (getLevel() * 2.5f));
+                    this.hp = i;
                     System.out.println("ZombieBoss hp nach attacke: " + getHp());
-                    if (hp <= 0){
+                    if (getHp() <= 0){
                         System.out.println("Der ZombieBoss wurde besiegt!");
                         heroXP += getXp();
                         System.out.println("Hero XP sind jetzt: " + heroXP);
