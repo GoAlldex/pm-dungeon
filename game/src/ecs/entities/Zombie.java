@@ -103,10 +103,14 @@ public class Zombie extends Monster {
         this.item = itm.getItem(rnd);
     }
 
+    public void setHp(int hp){
+        this.hp = hp;
+    }
+
     /**
      <b><span style="color: rgba(3,71,134,1);">Monster Loot</span></b><br>
      Rückgabe Monster Loot
-     @return ItemData Zufälliges Item
+     @return ItemData zufälliges Item
      @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
      @version cycle_1
      @since 26.04.2023
