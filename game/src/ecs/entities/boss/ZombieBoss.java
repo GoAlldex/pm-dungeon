@@ -43,6 +43,7 @@ public class ZombieBoss extends Boss{
      */
     public ZombieBoss(int level, Entity heroEntity) {
         super(level);
+        bossLogger = Logger.getLogger(getClass().getName());
         this.position = new PositionComponent(this);
         bossPosition(getPosition());
         heroPosition(new PositionComponent(heroEntity));
@@ -57,7 +58,6 @@ public class ZombieBoss extends Boss{
         setupSkills();
         setupHitboxComponent();
         setupIIdleAI();
-        bossLogger = Logger.getLogger(getClass().getName());
     }
 
     /**
