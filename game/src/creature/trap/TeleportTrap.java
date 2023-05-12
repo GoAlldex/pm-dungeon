@@ -2,23 +2,11 @@ package creature.trap;
 
 import dslToGame.AnimationBuilder;
 import ecs.components.AnimationComponent;
-import ecs.components.HitboxComponent;
-import ecs.components.PositionComponent;
 import ecs.entities.Entity;
 import graphic.Animation;
-import level.LevelAPI;
-import level.elements.ILevel;
 import level.elements.tile.FloorTile;
-import level.elements.tile.Tile;
-import level.elements.tile.WallTile;
-import level.generator.IGenerator;
-import level.generator.randomwalk.RandomWalkGenerator;
-import level.tools.Coordinate;
-import level.tools.LevelSize;
-import tools.Point;
 
 import java.util.List;
-import java.util.Random;
 
 public class TeleportTrap extends TrapGenerator{
     private static final String teleportPath = FLOORPATH + "teleport.png";

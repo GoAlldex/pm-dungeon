@@ -1,10 +1,7 @@
 package ecs.entities;
 
 import dslToGame.AnimationBuilder;
-import ecs.components.AnimationComponent;
-import ecs.components.HitboxComponent;
-import ecs.components.PositionComponent;
-import ecs.components.VelocityComponent;
+import ecs.components.*;
 import ecs.components.ai.AIComponent;
 import ecs.components.ai.idle.Idle;
 import ecs.components.ai.idle.PatrouilleWalk;
@@ -37,7 +34,9 @@ public class LittleDragon extends Monster {
     public LittleDragon(int level) {
         super();
         this.position = new PositionComponent(this);
+        onDeath();
         this.hp = Math.round(40*(1+(level/10)-0.1f));
+        //this.hp = new HealthComponent(this, Math.round(40f*(1f+((float)level/10f)-0.1f)), this.death, null, null);
         this.xp = Math.round(30*(1+(level/10)-0.1f));
         this.dmg = Math.round(7*(1+(level/10)-0.1f));
         this.dmgType = 0;
@@ -111,8 +110,13 @@ public class LittleDragon extends Monster {
      @version cycle_1
      @since 26.04.2023
      */
-    public ItemData onDeath() {
-        return this.item;
+    public void onDeath() {
+        this.death = new IOnDeathFunction() {
+            @Override
+            public void onDeath(Entity entity) {
+
+            }
+        };
     }
 
 }
