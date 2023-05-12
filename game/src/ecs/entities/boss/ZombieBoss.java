@@ -15,6 +15,7 @@ import tools.Constants;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
@@ -33,6 +34,7 @@ public class ZombieBoss extends Boss{
     private SlimeSkill slimeSkill;
     private static boolean init = false;
     private ArrayList<Zombie> zombies = new ArrayList<>();
+    private Logger bossLogger;
 
     /**
      * Konstruktor
@@ -55,6 +57,7 @@ public class ZombieBoss extends Boss{
         setupSkills();
         setupHitboxComponent();
         setupIIdleAI();
+        bossLogger = Logger.getLogger(getClass().getName());
     }
 
     /**
@@ -149,19 +152,19 @@ public class ZombieBoss extends Boss{
     private void setupHitboxZombie(){
         if (zombies != null){
             for (Zombie zombie : zombies) {
-                System.out.println("Zombie hp: " + zombie.getHp());
+                bossLogger.info("Zombie hp " + zombie.getHp());
                 new HitboxComponent(
                     zombie,
                     (you, other, direction) -> {
                         if (other != zombie && other == hero){
                            zombie.setHp(zombie.getHp() - (int)(getLevel() * 5.5f));
                             info("skill2");
-                            System.out.println("Zombies hp nach attacke: " + zombie.getHp());
+                            bossLogger.info("Zombie hp nach attacke: " + zombie.getHp());
 
                             if (zombie.getHp() <= 0){
-                                System.out.println("Zombie wurde besiegt!");
+                                bossLogger.info("Zombie wurde besiegt");
                                 heroXP += zombie.getXp();
-                                System.out.println("Hero XP sind jetzt: " + heroXP);
+                                bossLogger.info("Hero XP sind jetzt: " + heroXP);
                                 Game.removeEntity(zombie);
                             }
                         }
@@ -173,18 +176,18 @@ public class ZombieBoss extends Boss{
     }
 
     private void setupHitboxComponent() {
-        System.out.println("ZombieBoss hp: " + getHp());
+        bossLogger.info("ZombieBoss HP: " + getHp());
         new HitboxComponent(
             this,
             (you, other, direction) -> {
                 if (other != this && other == hero){
                     this.hp -= getLevel() * 2.5f;
-                    System.out.println("ZombieBoss hp nach attacke: " + getHp());
+                    bossLogger.info("ZombieBoss HP nach attacke: " + getHp());
                     if (hp <= 0){
-                        System.out.println("Der ZombieBoss wurde besiegt!");
+                        bossLogger.info("Der ZombieBoss wurde besiegt!");
                         heroXP += getXp();
-                        System.out.println("Hero XP sind jetzt: " + heroXP);
-                        System.out.println("Hero hat " + heroDMG + " damage's bekommen.");
+                        bossLogger.info("Hero XP sind jetzt: " + heroXP);
+                        bossLogger.info("Hero hat " + heroDMG + " damage's bekommen.");
                         Game.removeEntity(this);
                         Game.removeEntity(slimeSkill.getEntity());
                         if (zombies != null){
@@ -192,6 +195,7 @@ public class ZombieBoss extends Boss{
                                 Game.removeEntity(z.getAI().getEntity());
                             }
                         }
+                        assert zombies != null;
                         zombies.clear();
                     }
                     hitbox();
@@ -227,21 +231,19 @@ public class ZombieBoss extends Boss{
             assert skill2 != null;
             if (hit == 2){
                 if (!skill1.isOnCoolDown()){
-                    System.out.println("Skill 1 wird aktiviert!");
                     skill1.execute(hero);
                     setupAttack(6f, multi + .25f, 1);
                     hit = 0;
-                    System.out.println("Skill 1 wurde aktiviert!");
+                    bossLogger.info("Skill 1 wurde aktiviert");
                     info("skill1");
                     skillaktivierung = true;
                     return;
                 }
                 if (skillaktivierung && !skill2.isOnCoolDown()){
-                    System.out.println("Skill 2 wird aktiviert!");
                     skill2.execute(hero);
                     setupAttack(6f, multi + 0.25f, 2);
                     hit = 0;
-                    System.out.println("Skill 2 wurde aktiviert!");
+                    bossLogger.info("Skill 2 wurde aktiviert");
                     info("skill2");
                     hitboxZombie();
                     Game.removeEntity(slimeSkill.getEntity());
@@ -249,11 +251,11 @@ public class ZombieBoss extends Boss{
             }else {
                 if (skill1.isOnCoolDown()){
                     skill1.reduceCoolDown();
-                    System.err.println("Skill 1 is in cool down!");
+                    bossLogger.info("cool down Skill 1!");
                 }
                 if (skill2.isOnCoolDown()){
                     skill2.reduceCoolDown();
-                    System.err.println("Skill 2 is in cool down!");
+                    bossLogger.info("cool down Skill 2!");
                 }
             }
             if (hit == 2){
@@ -292,16 +294,17 @@ public class ZombieBoss extends Boss{
 
     private void info(String skill){
         if (skill.equalsIgnoreCase("skill1")){
-            System.out.println("Slime damage: " + schleimDMG);
-            System.out.println("ZombieBoss hat " + hp +"hp");
+            bossLogger.info("Slime damage: " + schleimDMG);
+            bossLogger.info("ZombieBoss hat " + hp +"hp");
             heroDMG += schleimDMG;
         } else if (skill.equalsIgnoreCase("skill2")) {
-            System.out.println("Zombie damage: " + zombieDMG);
-            System.out.println("ZombieBoss hat " + hp +"hp");
-            heroDMG += zombieDMG;
+            bossLogger.info("Zombie damage: " + zombieDMG);
+            bossLogger.info("ZombieBoss hat " + hp +"hp");
+            System.out.println();
+            System.out.println();
         } else {
-            System.out.println("Damage: " + dmg);
-            System.out.println("ZombieBoss hat " + hp +"hp");
+            bossLogger.info("Damage: " + dmg);
+            bossLogger.info("ZombieBoss hat " + hp +"hp");
             heroDMG += dmg;
         }
     }
