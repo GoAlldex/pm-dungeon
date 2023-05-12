@@ -161,7 +161,7 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         npcs.add(nGhost);
         // Monster
         Random rnd = new Random();
-        int rnd_mon_anz = rnd.nextInt(3);
+        int rnd_mon_anz = rnd.nextInt(4);
         rnd_mon_anz++;
         for(int i = 0; i < rnd_mon_anz; i++) {
             int rnd_mon = new Random().nextInt(3);
