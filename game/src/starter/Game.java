@@ -16,6 +16,7 @@ import creature.trap.*;
 import ecs.components.MissingComponentException;
 import ecs.components.PositionComponent;
 import ecs.entities.*;
+import ecs.entities.boss.ZombieBoss;
 import ecs.items.ItemDataGenerator;
 import ecs.items.WorldItemBuilder;
 import ecs.systems.*;
@@ -154,6 +155,7 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         monster.clear();
         trapGenerators.clear();
         currentLevel = levelAPI.getCurrentLevel();
+        levelCounter++;
         entities.clear();
         // NPC
         Ghost nGhost = new Ghost();
@@ -287,6 +289,15 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
             npc.setPosition(currentLevel.getRandomFloorTile().getCoordinate().toPoint());
         }
         entities.add(tomb);
+        ZombieBoss zombieBoss = new ZombieBoss(levelCounter, hero);
+        PositionComponent zmbPosition =
+            (PositionComponent)
+                zombieBoss.getComponent(PositionComponent.class)
+                    .orElseThrow(
+                        () -> new MissingComponentException("PositionComponent")
+                    );
+        zombieBoss.setPosition(zmbPosition);
+        entities.add(zombieBoss);
     }
 
     /** Toggle between pause and run */
