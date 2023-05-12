@@ -79,6 +79,10 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
     public int levelCounter = 0;
     private static final List<TrapGenerator> trapGenerators = new ArrayList<>();
     private ArrayList<Entity> worldItems = new ArrayList<>();
+    private boolean inventoryOpen = false;
+    private ArrayList<Entity> inventory = new ArrayList<>();
+    private static ArrayList<NPC> npcs = new ArrayList<>();
+    private static Tomb tomb = null;
 
     public static void main(String[] args) {
         // start the game
@@ -129,22 +133,35 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
 
     /** Called at the beginning of each frame. Before the controllers call <code>update</code>. */
     protected void frame() {
+        if(Gdx.input.isKeyJustPressed(Input.Keys.B)) {
+            if(inventoryOpen == false) {
+                //inventory.add(WorldInventoryBuilder.buildWorldInventory(hero.getInventory(), new Point(0,0)));
+            } else {
+                //inventory.clear();
+            }
+        }
         setCameraFocus();
         manageEntitiesSets();
         getHero().ifPresent(this::loadNextLevelIfEntityIsOnEndTile);
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) togglePause();
-        hero.update(pauseMenu);
+        tomb.update(entities, levelCounter);
     }
 
     @Override
     public void onLevelLoad() {
+        tomb = null;
+        npcs.clear();
         monster.clear();
         trapGenerators.clear();
         currentLevel = levelAPI.getCurrentLevel();
         entities.clear();
-        getHero().ifPresent(this::placeOnLevelStart);
+        // NPC
+        Ghost nGhost = new Ghost();
+        tomb = new Tomb(nGhost);
+        npcs.add(nGhost);
+        // Monster
         Random rnd = new Random();
-        int rnd_mon_anz = rnd.nextInt(20);
+        int rnd_mon_anz = rnd.nextInt(3);
         rnd_mon_anz++;
         for(int i = 0; i < rnd_mon_anz; i++) {
             int rnd_mon = new Random().nextInt(3);
@@ -156,21 +173,21 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
                 monster.add(new LittleDragon(levelCounter));
             }
         }
-        int rnd_itm_anz = rnd.nextInt(10);
+        int rnd_itm_anz = rnd.nextInt(2);
         rnd_itm_anz++;
         ItemDataGenerator itm = new ItemDataGenerator();
         for(int i = 0; i < rnd_itm_anz; i++) {
             worldItems.add(WorldItemBuilder.buildWorldItem(itm.generateItemData(), currentLevel.getRandomFloorTile().getCoordinate().toPoint()));
         }
-        int randomNumberTraps = new Random().nextInt(5);
+        int randomNumberTraps = new Random().nextInt(2);
         for (int i = 0; i < randomNumberTraps; i++) {
             //trapGenerator
             trapGenerators.add(new SpikesTrap(currentLevel.getFloorTiles()));
             trapGenerators.add(new TeleportTrap(currentLevel.getFloorTiles(), hero));
             trapGenerators.add(new SpawnTrap(currentLevel.getFloorTiles(), levelCounter));
         }
-
         getTraps().ifPresent(this::placeForTraps);
+        getHero().ifPresent(this::placeOnLevelStart);
     }
 
     public static Optional<Entity> getTraps() {
@@ -260,6 +277,16 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
                             () -> new MissingComponentException("PositionComponent"));
             npc.setPosition(currentLevel.getRandomFloorTile().getCoordinate().toPoint());
         }
+        for(NPC n : npcs) {
+            entities.add(n);
+            PositionComponent npc =
+                (PositionComponent)
+                    n.getComponent(PositionComponent.class)
+                        .orElseThrow(
+                            () -> new MissingComponentException("PositionComponent"));
+            npc.setPosition(currentLevel.getRandomFloorTile().getCoordinate().toPoint());
+        }
+        entities.add(tomb);
     }
 
     /** Toggle between pause and run */

@@ -34,7 +34,8 @@ public class Skeleton extends Monster {
         super();
         this.position = new PositionComponent(this);
         onDeath();
-        this.hp = new HealthComponent(this, Math.round(25f*(1f+((float)level/10f)-0.1f)), this.death, null, null);
+        this.hp = Math.round(10*(1+(level/10)-0.1f));
+        //this.hp = new HealthComponent(this, Math.round(25f*(1f+((float)level/10f)-0.1f)), this.death, null, null);
         this.xp = Math.round(10*(1+(level/10)-0.1f));
         this.dmg = Math.round(2*(1+(level/10)-0.1f));
         this.dmgType = 0;

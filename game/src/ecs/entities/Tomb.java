@@ -58,6 +58,7 @@ public class Tomb extends Entity {
 
     @Override
     public void update(Set<Entity> entities, int level) {
+        this.ghost.update();
         if(this.rewardOrPunishment && !this.isRewarded) {
             this.rewardOrPunishment = false;
             this.isRewarded = true;

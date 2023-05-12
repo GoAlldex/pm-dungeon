@@ -24,7 +24,8 @@ import ecs.items.ItemData;
  */
 public abstract class Monster extends Entity {
 
-    protected HealthComponent hp;
+    protected int hp;
+    //protected HealthComponent hp;
     protected long xp;
     protected int dmg;
     protected int dmgType;
@@ -47,8 +48,11 @@ public abstract class Monster extends Entity {
      @since 26.04.2023
      */
     public int getHp() {
-        return this.hp.getCurrentHealthpoints();
+        return this.hp;
     }
+    /*public int getHp() {
+        return this.hp.getCurrentHealthpoints();
+    }*/
 
     /**
      <b><span style="color: rgba(3,71,134,1);">Monster XP Menge</span></b><br>
