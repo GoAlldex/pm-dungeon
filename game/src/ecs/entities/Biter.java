@@ -7,11 +7,20 @@ import ecs.components.ai.idle.Idle;
 import ecs.components.ai.idle.PatrouilleWalk;
 import ecs.components.ai.idle.RadiusWalk;
 import ecs.components.ai.idle.StaticRadiusWalk;
+import ecs.damage.Damage;
 import ecs.items.ItemData;
 import ecs.items.ItemDataGenerator;
+import ecs.items.WorldItemBuilder;
+import ecs.systems.MyFormatter;
 import graphic.Animation;
+import tools.Constants;
 
+import java.io.IOException;
 import java.util.Random;
+import java.util.Set;
+import java.util.logging.*;
+
+import static ecs.damage.DamageType.PHYSICAL;
 
 /**
  <b><span style="color: rgba(3,71,134,1);">Unsere Monsterklasse "Beißer".</span></b><br>
@@ -35,8 +44,9 @@ public class Biter extends Monster {
         super();
         this.position = new PositionComponent(this);
         onDeath();
-        this.hp = Math.round(15f*(1f+(level/10f)-0.1f));
-        //this.hp = new HealthComponent(this, Math.round(15f*(1f+((float)level/10f)-0.1f)), this.death, null, null);
+        //this.hp = Math.round(15f*(1f+(level/10f)-0.1f));
+        this.hp2 = new HealthComponent(this, Math.round(15f*(1f+((float)level/10f)-0.1f)), this.death, null, null);
+        this.hitSpeed = 3;
         this.xp = Math.round(10*(1+(level/10)-0.1f));
         this.dmg = Math.round(2*(1+(level/10)-0.1f));
         this.dmgType = 0;
@@ -89,11 +99,51 @@ public class Biter extends Monster {
         new AnimationComponent(this, idleLeft, idleRight);
     }
 
+    @Override
+    public void update(Set<Entity> entities) {
+        fightHero();
+        dropItem(entities);
+    }
+
+    private void dropItem(Set<Entity> entities) {
+        if(this.dropItem) {
+            this.dropItem = false;
+            entities.add(WorldItemBuilder.buildWorldItem(item, this.position.getPosition()));
+        }
+    }
+
+    private void fightHero() {
+        if(this.fight) {
+            this.frameTime = this.hitSpeed * Constants.FRAME_RATE;
+            if(this.hitPause >= this.frameTime) {
+                this.hitPause = 0;
+                this.hero.getHp().receiveHit(new Damage(this.dmg, PHYSICAL, this));
+                log.info("Biter hits Hero: "+this.dmg+" Hp");
+                if(this.hero.getHp().getCurrentHealthpoints() == 0) {
+                    this.fight = false;
+                }
+            } else {
+                this.hitPause++;
+            }
+        }
+    }
+
     private void setupHitboxComponent() {
         new HitboxComponent(
             this,
-            (you, other, direction) -> System.out.println("BiterCollisionEnter"),
-            (you, other, direction) -> System.out.println("BiterCollisionLeave"));
+            (you, other, direction) -> {
+                if(other.getClass().getName().equals("ecs.entities.Hero")) {
+                    if(this.hero == null) {
+                        this.hero = (Hero) other;
+                    }
+                    this.fight = true;
+                }
+            },
+            (you, other, direction) -> {
+                if(other.getClass().getName().equals("ecs.entities.Hero")) {
+                    this.fight = false;
+                }
+            });
     }
 
     private void setItem() {
@@ -114,7 +164,10 @@ public class Biter extends Monster {
         this.death = new IOnDeathFunction() {
             @Override
             public void onDeath(Entity entity) {
-
+                log.info("Monster Biter died");
+                hero.getXP().addXP(xp);
+                log.info("Hero get "+xp+" XP");
+                dropItem = true;
             }
         };
     }

@@ -39,7 +39,7 @@ import tools.Point;
 /** The heart of the framework. From here all strings are pulled. */
 public class Game extends ScreenAdapter implements IOnLevelLoader {
 
-    private final LevelSize LEVELSIZE = LevelSize.MEDIUM;
+    private final LevelSize LEVELSIZE = LevelSize.SMALL;
 
     /**
      * The batch is necessary to draw ALL the stuff. Every object that uses draw need to know the
@@ -145,40 +145,19 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         getHero().ifPresent(this::loadNextLevelIfEntityIsOnEndTile);
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) togglePause();
         tomb.update(entities, levelCounter);
+        for(Monster m : monster) {
+            m.update();
+        }
     }
 
     @Override
     public void onLevelLoad() {
-        tomb = null;
-        npcs.clear();
-        monster.clear();
         trapGenerators.clear();
         currentLevel = levelAPI.getCurrentLevel();
         entities.clear();
-        // NPC
-        Ghost nGhost = new Ghost();
-        tomb = new Tomb(nGhost);
-        npcs.add(nGhost);
-        // Monster
-        Random rnd = new Random();
-        int rnd_mon_anz = rnd.nextInt(4);
-        rnd_mon_anz++;
-        for(int i = 0; i < rnd_mon_anz; i++) {
-            int rnd_mon = new Random().nextInt(3);
-            if(rnd_mon == 0) {
-                monster.add(new Biter(levelCounter));
-            } else if(rnd_mon == 1) {
-                monster.add(new Zombie(levelCounter));
-            } else {
-                monster.add(new LittleDragon(levelCounter));
-            }
-        }
-        int rnd_itm_anz = rnd.nextInt(2);
-        rnd_itm_anz++;
-        ItemDataGenerator itm = new ItemDataGenerator();
-        for(int i = 0; i < rnd_itm_anz; i++) {
-            worldItems.add(WorldItemBuilder.buildWorldItem(itm.generateItemData(), currentLevel.getRandomFloorTile().getCoordinate().toPoint()));
-        }
+        createNPC();
+        createMonster();
+        createWorldItems();
         int randomNumberTraps = new Random().nextInt(2);
         for (int i = 0; i < randomNumberTraps; i++) {
             //trapGenerator
@@ -188,6 +167,60 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         }
         getTraps().ifPresent(this::placeForTraps);
         getHero().ifPresent(this::placeOnLevelStart);
+    }
+
+    public void createNPC() {
+        tomb = null;
+        npcs.clear();
+        Ghost nGhost = new Ghost();
+        tomb = new Tomb(nGhost);
+        npcs.add(nGhost);
+        for(NPC n : npcs) {
+            entities.add(n);
+            PositionComponent npc =
+                (PositionComponent)
+                    n.getComponent(PositionComponent.class)
+                        .orElseThrow(
+                            () -> new MissingComponentException("PositionComponent"));
+            npc.setPosition(currentLevel.getRandomFloorTile().getCoordinate().toPoint());
+        }
+        entities.add(tomb);
+    }
+
+    public void createWorldItems() {
+        Random rnd = new Random();
+        int rnd_itm_anz = rnd.nextInt(2);
+        rnd_itm_anz++;
+        ItemDataGenerator itm = new ItemDataGenerator();
+        for(int i = 0; i < rnd_itm_anz; i++) {
+            worldItems.add(WorldItemBuilder.buildWorldItem(itm.generateItemData(), currentLevel.getRandomFloorTile().getCoordinate().toPoint()));
+        }
+    }
+
+    public void createMonster() {
+        monster.clear();
+        Random rnd = new Random();
+        int rnd_mon_anz = rnd.nextInt(4);
+        rnd_mon_anz++;
+        for(int i = 0; i < rnd_mon_anz; i++) {
+            int rnd_mon = new Random().nextInt(3);
+            if(rnd_mon == 0) {
+                monster.add(new Biter(levelCounter));
+            } else if(rnd_mon == 1) {
+                //monster.add(new Zombie(levelCounter));
+            } else {
+                //monster.add(new LittleDragon(levelCounter));
+            }
+        }
+        for(Monster m : monster) {
+            entities.add(m);
+            PositionComponent npc =
+                (PositionComponent)
+                    m.getComponent(PositionComponent.class)
+                        .orElseThrow(
+                            () -> new MissingComponentException("PositionComponent"));
+            npc.setPosition(currentLevel.getRandomFloorTile().getCoordinate().toPoint());
+        }
     }
 
     public static Optional<Entity> getTraps() {
@@ -268,25 +301,6 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
                                 .orElseThrow(
                                         () -> new MissingComponentException("PositionComponent"));
         pc.setPosition(currentLevel.getStartTile().getCoordinate().toPoint());
-        for(Monster m : monster) {
-            entities.add(m);
-            PositionComponent npc =
-                (PositionComponent)
-                    m.getComponent(PositionComponent.class)
-                        .orElseThrow(
-                            () -> new MissingComponentException("PositionComponent"));
-            npc.setPosition(currentLevel.getRandomFloorTile().getCoordinate().toPoint());
-        }
-        for(NPC n : npcs) {
-            entities.add(n);
-            PositionComponent npc =
-                (PositionComponent)
-                    n.getComponent(PositionComponent.class)
-                        .orElseThrow(
-                            () -> new MissingComponentException("PositionComponent"));
-            npc.setPosition(currentLevel.getRandomFloorTile().getCoordinate().toPoint());
-        }
-        entities.add(tomb);
     }
 
     /** Toggle between pause and run */
@@ -384,5 +398,6 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         new XPSystem();
         new SkillSystem();
         new ProjectileSystem();
+        Monster.MonsterLogs();
     }
 }

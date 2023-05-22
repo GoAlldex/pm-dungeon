@@ -9,6 +9,7 @@ import ecs.components.AnimationComponent;
 import ecs.components.PositionComponent;
 import ecs.components.VelocityComponent;
 import ecs.components.skill.*;
+import ecs.components.xp.XPComponent;
 import ecs.items.ItemDataGenerator;
 import graphic.Animation;
 import graphic.hud.PauseMenu;
@@ -25,6 +26,7 @@ public class Hero extends Entity {
     private final int fireballCoolDown = 5;
     private final float xSpeed = 0.3f;
     private final float ySpeed = 0.3f;
+    private XPComponent xp;
 
     private final String pathToIdleLeft = "knight/idleLeft";
     private final String pathToIdleRight = "knight/idleRight";
@@ -37,13 +39,16 @@ public class Hero extends Entity {
     private HealthComponent hp;
     private IOnDeathFunction death;
     private PositionComponent position;
+    private Animation hitAnimation = AnimationBuilder.buildAnimation("knight/hit");
+    private Animation dieAnimation = AnimationBuilder.buildAnimation("knight/hit");
 
     /** Entity with Components */
     public Hero() {
         super();
+        this.xp = new XPComponent(this);
         this.position = new PositionComponent(this);
         onDeath();
-        this.hp = new HealthComponent(this, 100, this.death, null, null);
+        this.hp = new HealthComponent(this, 100, this.death, this.hitAnimation, this.dieAnimation);
         setupVelocityComponent();
         setupAnimationComponent();
         setupHitboxComponent();
@@ -112,6 +117,14 @@ public class Hero extends Entity {
      */
     public PositionComponent getPosition() {
         return position;
+    }
+
+    public HealthComponent getHp() {
+        return this.hp;
+    }
+
+    public XPComponent getXP() {
+        return this.xp;
     }
 
 }
