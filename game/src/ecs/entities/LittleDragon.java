@@ -35,8 +35,7 @@ public class LittleDragon extends Monster {
         super();
         this.position = new PositionComponent(this);
         onDeath();
-        this.hp = Math.round(40*(1+(level/10)-0.1f));
-        //this.hp = new HealthComponent(this, Math.round(40f*(1f+((float)level/10f)-0.1f)), this.death, null, null);
+        this.hp = new HealthComponent(this, Math.round(40f*(1f+((float)level/10f)-0.1f)), this.death, null, null);
         this.xp = Math.round(30*(1+(level/10)-0.1f));
         this.dmg = Math.round(7*(1+(level/10)-0.1f));
         this.dmgType = 0;

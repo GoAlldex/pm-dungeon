@@ -10,6 +10,7 @@ import ecs.entities.Entity;
 import ecs.entities.Monster;
 import graphic.Animation;
 import java.util.LinkedList;
+import java.util.logging.Logger;
 
 /**
  * <h1>Boss</h1>
@@ -57,6 +58,7 @@ public abstract class Boss extends Monster {
     private static LinkedList<Skill> skills= new LinkedList<>();//weitere Skills
     protected Skill skill1, skill2; //default
     private int level = 0; //Held level
+    protected Logger bossLogger;
 
     /**
      * Konstruktor
@@ -64,6 +66,7 @@ public abstract class Boss extends Monster {
      */
     public Boss(int level){
         this.level = level;
+        this.bossLogger = Logger.getLogger(getClass().getName());
     }
 
     /**
@@ -167,4 +170,31 @@ public abstract class Boss extends Monster {
     public int size(){
         return skills.size();
     }
+
+    public String getAnimation(String name){
+        switch (name){
+            case "left" -> {
+                return pathToIdleLeft;
+            }
+            case "right" -> {
+                return pathToIdleRight;
+            }
+            case "runLeft" -> {
+                return pathToRunLeft;
+            }
+            case "runRight" -> {
+                return pathToRunRight;
+            }
+        }
+        return "";
+    }
+
+    /**
+     * @return Wirft ein empty Animation file zurück.
+     */
+    public Animation getEmptyAnimation(){
+        return AnimationBuilder.buildAnimation("monster/empty/empty_f0.png");
+    }
+
+    public abstract String information();
 }

@@ -35,8 +35,7 @@ public class Zombie extends Monster {
         super();
         this.position = new PositionComponent(this);
         onDeath();
-        this.hp = Math.round(25*(1+(level/10)-0.1f));
-        //this.hp = new HealthComponent(this, Math.round(25f*(1f+((float)level/10f)-0.1f)), this.death, null, null);
+        this.hp = new HealthComponent(this, Math.round(25f*(1f+((float)level/10f)-0.1f)), this.death, null, null);
         this.xp = Math.round(20*(1+(level/10)-0.1f));
         this.dmg = Math.round(4*(1+(level/10)-0.1f));
         this.dmgType = 0;
@@ -103,7 +102,25 @@ public class Zombie extends Monster {
     }
 
     public void setHp(int hp){
-        this.hp = hp;
+        this.hp.setCurrentHealthpoints(hp);
+    }
+
+    public String getAnimationPath(String name){
+        switch (name){
+            case "left" -> {
+                return pathToIdleLeft;
+            }
+            case "right" -> {
+                return pathToIdleRight;
+            }
+            case "runLeft" -> {
+                return pathToRunLeft;
+            }
+            case "runRight" -> {
+                return pathToRunRight;
+            }
+        }
+        return "";
     }
 
     /**

@@ -66,4 +66,8 @@ public abstract class Slime implements ISkillFunction {
     public Entity getSlime(){
         return slime;
     }
+
+    public Damage getSlimeDamge() {
+        return slimeDamge;
+    }
 }

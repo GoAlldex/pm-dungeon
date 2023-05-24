@@ -18,17 +18,21 @@ public class PlayableComponent extends Component {
 
     private Skill skillSlot1;
     private Skill skillSlot2;
+    private Skill skillSlot3;
+    private Skill skillSlot4;
 
     /**
      * @param entity associated entity
      * @param skillSlot1 skill that will be on the first skillslot
      * @param skillSlot2 skill that will be on the second skillslot
      */
-    public PlayableComponent(Entity entity, Skill skillSlot1, Skill skillSlot2) {
+    public PlayableComponent(Entity entity, Skill skillSlot1, Skill skillSlot2, Skill skillSlot3, Skill skillSlot4) {
         super(entity);
         playable = true;
         this.skillSlot1 = skillSlot1;
         this.skillSlot2 = skillSlot2;
+        this.skillSlot3 = skillSlot3;
+        this.skillSlot4 = skillSlot4;
     }
 
     /** {@inheritDoc} */
@@ -65,10 +69,24 @@ public class PlayableComponent extends Component {
     }
 
     /**
-     * @param skillSlot2 skill that will be on the first skillslot
+     * @param skillSlot2 skill that will be on the second skillslot
      */
     public void setSkillSlot2(Skill skillSlot2) {
         this.skillSlot2 = skillSlot2;
+    }
+
+    /**
+     * @param skillSlot3 skill that will be on the third skillslot
+     */
+    public void setSkillSlot3(Skill skillSlot3) {
+        this.skillSlot3 = skillSlot3;
+    }
+
+    /**
+     * @param skillSlot4 skill that will be on the fourth skillslot
+     */
+    public void setSkillSlot4(Skill skillSlot4) {
+        this.skillSlot4 = skillSlot4;
     }
 
     /**
@@ -83,5 +101,20 @@ public class PlayableComponent extends Component {
      */
     public Optional<Skill> getSkillSlot2() {
         return Optional.ofNullable(skillSlot2);
+    }
+
+
+    /**
+     * @return skill on third skill slot
+     */
+    public Optional<Skill> getSkillSlot3() {
+        return Optional.ofNullable(skillSlot3);
+    }
+
+    /**
+     * @return skill on fourth skill slot
+     */
+    public Optional<Skill> getSkillSlot4() {
+        return Optional.ofNullable(skillSlot4);
     }
 }

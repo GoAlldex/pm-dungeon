@@ -13,12 +13,16 @@ import configuration.KeyboardConfig;
 import controller.AbstractController;
 import controller.SystemController;
 import creature.trap.*;
+import ecs.entities.boss.OrcBoss;
+import ecs.items.WorldItemBuilder;
+import graphic.hud.GameOver;
 import ecs.components.MissingComponentException;
 import ecs.components.PositionComponent;
 import ecs.entities.*;
+import ecs.entities.boss.BiterBoss;
+import ecs.entities.boss.Boss;
 import ecs.entities.boss.ZombieBoss;
 import ecs.items.ItemDataGenerator;
-import ecs.items.WorldItemBuilder;
 import ecs.systems.*;
 import graphic.DungeonCamera;
 import graphic.Painter;
@@ -60,7 +64,7 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
     protected IGenerator generator;
 
     private boolean doSetup = true;
-    private static boolean paused = false;
+    private static boolean paused = false, isGameOver = false;
 
     /** All entities that are currently active in the dungeon */
     private static final Set<Entity> entities = new HashSet<>();
@@ -74,16 +78,18 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
 
     public static ILevel currentLevel;
     private static PauseMenu<Actor> pauseMenu;
+    private static GameOver<Actor> gameOver;
     private static Entity hero;
     private Logger gameLogger;
     private static ArrayList<Monster> monster = new ArrayList<>();
-    public int levelCounter = 0;
+    public static int levelCounter = 0;
     private static final List<TrapGenerator> trapGenerators = new ArrayList<>();
     private ArrayList<Entity> worldItems = new ArrayList<>();
     private boolean inventoryOpen = false;
     private ArrayList<Entity> inventory = new ArrayList<>();
     private static ArrayList<NPC> npcs = new ArrayList<>();
     private static Tomb tomb = null;
+    public static  ArrayList<Boss> bosses = new ArrayList<>();
 
     public static void main(String[] args) {
         // start the game
@@ -125,7 +131,9 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         systems = new SystemController();
         controller.add(systems);
         pauseMenu = new PauseMenu<>();
+        gameOver = new GameOver<>();
         controller.add(pauseMenu);
+        controller.add(gameOver);
         hero = new Hero();
         levelAPI = new LevelAPI(batch, painter, new WallGenerator(new RandomWalkGenerator()), this);
         levelAPI.loadLevel(LEVELSIZE);
@@ -143,9 +151,70 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         }
         setCameraFocus();
         manageEntitiesSets();
-        getHero().ifPresent(this::loadNextLevelIfEntityIsOnEndTile);
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) togglePause();
+        if (hero != null && getHero().isPresent()){
+            Hero hero1 = (Hero) hero;
+            if (hero1.pc != null){
+                //Skill 1 - Fireball
+                if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
+                    if (hero1.pc.getSkillSlot1().isPresent())
+                        hero1.execute(hero1.pc.getSkillSlot1().get());
+                }
+                //Skill 2 - Blitzschlag
+                if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
+                    if (hero1.pc.getSkillSlot2().isPresent())
+                        hero1.execute(hero1.pc.getSkillSlot2().get());
+                }
+                //Skill 3 - Verwandlung
+                if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
+                    if (hero1.pc.getSkillSlot3().isPresent())
+                        hero1.execute(hero1.pc.getSkillSlot3().get());
+                }
+                //Skill 4 Boss Informationen
+                if (Gdx.input.isKeyJustPressed(Input.Keys.F4)) {
+                    if (hero1.pc.getSkillSlot4().isPresent())
+                        hero1.execute(hero1.pc.getSkillSlot4().get());
+                }
+                //soldange nicht gameover ist, Rufe die methode
+                //update auf
+                if (!hero1.isGameOver()){
+                    hero1.update();
+                    for (Boss boss : bosses) {
+                        if (entities.contains(boss)){
+                            boss.update(entities, levelCounter);
+                        }
+                    }
+                }
+                //wenn gameover und hero noch da ist,
+                //Lösche es
+                if (hero1.isGameOver()){
+                    if (Game.getHero().isPresent()){
+                        levelCounter = 0;
+                        entities.clear();
+                        bosses.clear();
+                        monster.clear();
+                        removeEntity(hero);
+                        hero1 = null;
+                    }
+                }
+            }
+            //Neustart
+            if (isGameOver){
+                if (Gdx.input.isKeyJustPressed(Input.Keys.R)){
+                    hero = new Hero();
+                    levelAPI.loadLevel(LEVELSIZE);
+                    gameOver();
+                }
+            }
+            if (Game.getHero().isPresent()){
+                if (Gdx.input.isKeyJustPressed(Input.Keys.I)){
+                    assert hero1 != null;
+                    hero1.info();
+                }
+            }
+        }
         tomb.update(entities, levelCounter);
+        getHero().ifPresent(this::loadNextLevelIfEntityIsOnEndTile);
     }
 
     @Override
@@ -289,15 +358,27 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
             npc.setPosition(currentLevel.getRandomFloorTile().getCoordinate().toPoint());
         }
         entities.add(tomb);
+
         ZombieBoss zombieBoss = new ZombieBoss(levelCounter, hero);
-        PositionComponent zmbPosition =
+        BiterBoss biterBoss = new BiterBoss(levelCounter, hero);
+        OrcBoss orcBoss = new OrcBoss(levelCounter, hero);
+        zombieBoss.setPosition(getPositionComponent(zombieBoss));
+        biterBoss.setPosition(getPositionComponent(biterBoss));
+        orcBoss.setPosition(getPositionComponent(orcBoss));
+        bosses.add(zombieBoss);
+        bosses.add(biterBoss);
+        bosses.add(orcBoss);
+    }
+
+    private PositionComponent getPositionComponent(Entity entity){
+        PositionComponent position =
             (PositionComponent)
-                zombieBoss.getComponent(PositionComponent.class)
+                entity.getComponent(PositionComponent.class)
                     .orElseThrow(
                         () -> new MissingComponentException("PositionComponent")
                     );
-        zombieBoss.setPosition(zmbPosition);
-        entities.add(zombieBoss);
+        addEntity(entity);
+        return position;
     }
 
     /** Toggle between pause and run */
@@ -309,6 +390,17 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         if (pauseMenu != null) {
             if (paused) pauseMenu.showMenu();
             else pauseMenu.hideMenu();
+        }
+    }
+
+    public static void gameOver(){
+        isGameOver = !isGameOver;
+        if (systems != null){
+            systems.forEach(ECS_System::toggleRun);
+        }
+        if (gameOver != null){
+            if (isGameOver) gameOver.showGameOver();
+            else gameOver.hideGameOver();
         }
     }
 
@@ -395,5 +487,6 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         new XPSystem();
         new SkillSystem();
         new ProjectileSystem();
+        new ManaSystem();
     }
 }
