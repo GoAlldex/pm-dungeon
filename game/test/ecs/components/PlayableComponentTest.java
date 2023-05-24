@@ -43,4 +43,15 @@ public class PlayableComponentTest {
         playableComponent.setSkillSlot2(s2);
         assertEquals(s2, playableComponent.getSkillSlot2().get());
     }
+
+
+    @Test
+    public void setSkillSlot3() {
+        Skill s = Mockito.mock(Skill.class);
+        playableComponent.setSkillSlot3(s);
+        assertEquals(s, playableComponent.getSkillSlot3().get());
+        Skill s2 = Mockito.mock(Skill.class);
+        playableComponent.setSkillSlot3(s2);
+        assertEquals(s2, playableComponent.getSkillSlot3().get());
+    }
 }
