@@ -23,6 +23,8 @@ import java.util.Set;
 public class Hero extends Entity {
 
     private final int fireballCoolDown = 5;
+    private final int arrowCoolDown = 1;
+    private final int boomerangCoolDown = 2;
     private final float xSpeed = 0.3f;
     private final float ySpeed = 0.3f;
 
@@ -30,7 +32,15 @@ public class Hero extends Entity {
     private final String pathToIdleRight = "knight/idleRight";
     private final String pathToRunLeft = "knight/runLeft";
     private final String pathToRunRight = "knight/runRight";
-    private Skill firstSkill;
+    private Skill firstSkill = new Skill(
+            new FireballSkill(SkillTools::getCursorPositionAsPoint), fireballCoolDown);
+
+    private Skill secondSkill = new Skill(
+        new ArrowSkill(SkillTools::getCursorPositionAsPoint), arrowCoolDown);
+
+    private Skill thirdSkill = new Skill(
+        new BoomerangSkill(SkillTools::getCursorPositionAsPoint), boomerangCoolDown);
+
 
     private InventoryComponent inventory;
     int cd = 30;
@@ -49,7 +59,10 @@ public class Hero extends Entity {
         setupHitboxComponent();
         PlayableComponent pc = new PlayableComponent(this);
         setupFireballSkill();
+        setupArrowSkill();
         pc.setSkillSlot1(firstSkill);
+        pc.setSkillSlot2(secondSkill);
+        pc.setSkillSlot3(thirdSkill);
         setDefaultItems();
     }
 
@@ -69,6 +82,18 @@ public class Hero extends Entity {
         firstSkill =
                 new Skill(
                         new FireballSkill(SkillTools::getCursorPositionAsPoint), fireballCoolDown);
+    }
+
+    private void setupArrowSkill(){
+        secondSkill =
+            new Skill (
+                        new ArrowSkill(SkillTools::getCursorPositionAsPoint), arrowCoolDown);
+    }
+
+    private void setupBoomerangSkill(){
+        thirdSkill =
+            new Skill (
+                       new BoomerangSkill(SkillTools::getCursorPositionAsPoint), boomerangCoolDown);
     }
 
     private void setupHitboxComponent() {

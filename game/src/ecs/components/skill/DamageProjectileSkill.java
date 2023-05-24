@@ -16,7 +16,7 @@ public abstract class DamageProjectileSkill implements ISkillFunction {
 
     private float projectileRange;
     private Damage projectileDamage;
-    private Point projectileHitboxSize;
+    protected Point projectileHitboxSize;
 
     private ITargetSelection selectionFunction;
 
