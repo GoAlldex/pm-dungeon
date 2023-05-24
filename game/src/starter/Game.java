@@ -144,10 +144,11 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         manageEntitiesSets();
         getHero().ifPresent(this::loadNextLevelIfEntityIsOnEndTile);
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) togglePause();
-        tomb.update(entities, levelCounter);
+        tomb.update(levelCounter);
         for(Monster m : monster) {
             m.update();
         }
+        hero.update();
     }
 
     @Override
@@ -207,9 +208,9 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
             if(rnd_mon == 0) {
                 monster.add(new Biter(levelCounter));
             } else if(rnd_mon == 1) {
-                //monster.add(new Zombie(levelCounter));
+                monster.add(new Zombie(levelCounter));
             } else {
-                //monster.add(new LittleDragon(levelCounter));
+                monster.add(new LittleDragon(levelCounter));
             }
         }
         for(Monster m : monster) {
@@ -399,5 +400,6 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         new SkillSystem();
         new ProjectileSystem();
         Monster.MonsterLogs();
+        Hero.HeroLogs();
     }
 }

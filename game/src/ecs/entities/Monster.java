@@ -4,9 +4,11 @@ import ecs.components.*;
 import ecs.components.ai.AIComponent;
 import ecs.items.ItemData;
 import ecs.systems.MyFormatter;
+import graphic.Animation;
 
 import java.io.IOException;
 import java.util.logging.*;
+import starter.Game;
 
 /**
  <b><span style="color: rgba(3,71,134,1);">Unsere Grund Monsterklasse, die alle Monster erben.</span></b><br>
@@ -28,8 +30,8 @@ import java.util.logging.*;
  */
 public abstract class Monster extends Entity {
 
-    protected int hp;
-    protected HealthComponent hp2;
+    //protected int hp;
+    protected HealthComponent hp;
     protected long xp;
     protected int dmg;
     protected int dmgType;
@@ -48,6 +50,9 @@ public abstract class Monster extends Entity {
     protected int hitSpeed;
     protected int hitPause = 0;
     protected int frameTime;
+    protected Animation hitAnimation;
+    protected Animation dieAnimation;
+    protected AnimationComponent monsterAnimation;
 
     protected static final Logger log = Logger.getLogger(Biter.class.getName());
 
@@ -70,7 +75,7 @@ public abstract class Monster extends Entity {
             e.printStackTrace();
         }
         ConsoleHandler consoleHandler = new ConsoleHandler();
-        consoleHandler.setLevel(Level.WARNING);
+        consoleHandler.setLevel(Level.INFO);
         consoleHandler.setFormatter(new MyFormatter("Monster"));
         log.addHandler(consoleHandler);
         log.setUseParentHandlers(false);
@@ -84,12 +89,10 @@ public abstract class Monster extends Entity {
      @version cycle_1
      @since 26.04.2023
      */
-    public int getHp() {
+
+    public HealthComponent getHp() {
         return this.hp;
     }
-    /*public int getHp() {
-        return this.hp.getCurrentHealthpoints();
-    }*/
 
     /**
      <b><span style="color: rgba(3,71,134,1);">Monster XP Menge</span></b><br>

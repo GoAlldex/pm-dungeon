@@ -11,9 +11,13 @@ import ecs.damage.Damage;
 import ecs.items.ItemData;
 import ecs.items.ItemDataGenerator;
 import ecs.items.WorldItemBuilder;
+import ecs.systems.CollisionSystem;
 import ecs.systems.MyFormatter;
 import graphic.Animation;
+import level.elements.tile.FloorTile;
+import starter.Game;
 import tools.Constants;
+import tools.Point;
 
 import java.io.IOException;
 import java.util.Random;
@@ -44,8 +48,9 @@ public class Biter extends Monster {
         super();
         this.position = new PositionComponent(this);
         onDeath();
-        //this.hp = Math.round(15f*(1f+(level/10f)-0.1f));
-        this.hp2 = new HealthComponent(this, Math.round(15f*(1f+((float)level/10f)-0.1f)), this.death, null, null);
+        this.hitAnimation = AnimationBuilder.buildAnimation("");
+        this.dieAnimation = AnimationBuilder.buildAnimation("monster/type1/death");
+        this.hp = new HealthComponent(this, Math.round(15f*(1f+((float)level/10f)-0.1f)), this.death, this.hitAnimation, this.dieAnimation);
         this.hitSpeed = 3;
         this.xp = Math.round(10*(1+(level/10)-0.1f));
         this.dmg = Math.round(2*(1+(level/10)-0.1f));
@@ -96,34 +101,53 @@ public class Biter extends Monster {
     private void setupAnimationComponent() {
         Animation idleRight = AnimationBuilder.buildAnimation(pathToIdleRight);
         Animation idleLeft = AnimationBuilder.buildAnimation(pathToIdleLeft);
-        new AnimationComponent(this, idleLeft, idleRight);
+        this.monsterAnimation = new AnimationComponent(this, idleLeft, idleRight);
     }
 
     @Override
-    public void update(Set<Entity> entities) {
+    public void update() {
         fightHero();
-        dropItem(entities);
+        dropItem();
     }
 
-    private void dropItem(Set<Entity> entities) {
+    private void dropItem() {
         if(this.dropItem) {
             this.dropItem = false;
-            entities.add(WorldItemBuilder.buildWorldItem(item, this.position.getPosition()));
+            Game.addEntity(WorldItemBuilder.buildWorldItem(item, this.position.getPosition()));
         }
     }
 
     private void fightHero() {
-        if(this.fight) {
-            this.frameTime = this.hitSpeed * Constants.FRAME_RATE;
-            if(this.hitPause >= this.frameTime) {
-                this.hitPause = 0;
-                this.hero.getHp().receiveHit(new Damage(this.dmg, PHYSICAL, this));
-                log.info("Biter hits Hero: "+this.dmg+" Hp");
-                if(this.hero.getHp().getCurrentHealthpoints() == 0) {
-                    this.fight = false;
+        if(this.fight && this.getHp().getCurrentHealthpoints() <= 0) {
+            this.fight = false;
+        } else {
+            if (this.fight && Game.getEntities().contains(this.hero)) {
+                this.frameTime = this.hitSpeed * Constants.FRAME_RATE;
+                if (this.hitPause >= this.frameTime) {
+                    this.hitPause = 0;
+                    this.hero.getHp().receiveHit(new Damage(this.dmg, PHYSICAL, this));
+                    //this.hero.getHeroAnimation().setCurrentAnimation(this.hero.getHp().getGetHitAnimation());
+                    /*Boolean check_kick = false;
+                    Point npos = hero.getPosition().getPosition();
+                    npos.x += 0.25f;
+                    for(FloorTile ft : Game.currentLevel.getFloorTiles()) {
+                        if(ft.getCoordinate().equals(npos)) {
+                            check_kick = true;
+                            break;
+                        }
+                    }
+                    if(check_kick) {
+                        hero.getPosition().setPosition(npos);
+                    }*/
+                    log.info("Biter hits Hero: " + this.dmg + " Hp");
+                    if (this.hero.getHp().getCurrentHealthpoints() <= 0) {
+                        this.fight = false;
+                    }
+                } else {
+                    this.hitPause++;
                 }
             } else {
-                this.hitPause++;
+                this.fight = false;
             }
         }
     }
@@ -132,7 +156,7 @@ public class Biter extends Monster {
         new HitboxComponent(
             this,
             (you, other, direction) -> {
-                if(other.getClass().getName().equals("ecs.entities.Hero")) {
+                if(other instanceof Hero) {
                     if(this.hero == null) {
                         this.hero = (Hero) other;
                     }
@@ -140,16 +164,10 @@ public class Biter extends Monster {
                 }
             },
             (you, other, direction) -> {
-                if(other.getClass().getName().equals("ecs.entities.Hero")) {
+                if(other instanceof Hero) {
                     this.fight = false;
                 }
             });
-    }
-
-    private void setItem() {
-        ItemDataGenerator itm = new ItemDataGenerator();
-        int rnd = new Random().nextInt(itm.getAllItems().size());
-        this.item = itm.getItem(rnd);
     }
 
     /**
@@ -160,15 +178,25 @@ public class Biter extends Monster {
      @version cycle_1
      @since 26.04.2023
      */
+    private void setItem() {
+        ItemDataGenerator itm = new ItemDataGenerator();
+        int rnd = new Random().nextInt(itm.getAllItems().size());
+        this.item = itm.getItem(rnd);
+    }
+
     public void onDeath() {
-        this.death = new IOnDeathFunction() {
-            @Override
-            public void onDeath(Entity entity) {
-                log.info("Monster Biter died");
-                hero.getXP().addXP(xp);
-                log.info("Hero get "+xp+" XP");
-                dropItem = true;
+        this.death = entity -> {
+            log.info("Monster Biter died");
+            long lvl = hero.getXP().getCurrentLevel();
+            hero.getXP().addXP(xp);
+            if(lvl < hero.getXP().getCurrentLevel()) {
+                log.info("Hero level up: "+lvl+" to "+hero.getXP().getCurrentLevel());
+                hero.setMaxHp((int)hero.getXP().getCurrentLevel());
+                hero.setMeleeDmg((int)hero.getXP().getCurrentLevel());
+                log.info("New Parameters for hero: new "+hero.getHp().getMaximalHealthpoints()+" HP and new "+hero.getDmg()+" Melee DMG");
             }
+            log.info("Hero get "+xp+" XP");
+            dropItem = true;
         };
     }
 

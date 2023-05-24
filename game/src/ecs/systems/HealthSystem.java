@@ -6,8 +6,10 @@ import ecs.components.MissingComponentException;
 import ecs.components.stats.StatsComponent;
 import ecs.components.xp.XPComponent;
 import ecs.damage.DamageType;
-import ecs.entities.Entity;
+import ecs.entities.*;
+
 import java.util.stream.Stream;
+
 import starter.Game;
 
 /**
@@ -92,8 +94,10 @@ public class HealthSystem extends ECS_System {
     private void removeDeadEntities(HSData hsd) {
         // Entity appears to be dead, so let's clean up the mess
         hsd.hc.triggerOnDeath();
-        hsd.ac.setCurrentAnimation(hsd.hc.getDieAnimation());
-        // TODO: Before removing the entity, check if the animation is finished (Issue #246)
+        //hsd.ac.setCurrentAnimation(hsd.hc.getDieAnimation());
+        if(hsd.e instanceof Hero || hsd.e instanceof Monster) {
+            Game.addEntity(new DeadAnimation(hsd.hc.getEntity()));
+        }
         Game.removeEntity(hsd.hc.getEntity());
 
         // Add XP

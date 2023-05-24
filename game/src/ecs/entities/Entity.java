@@ -61,6 +61,8 @@ public class Entity {
 
     public void update(Set<Entity> entities){};
 
+    public void update(int level){};
+
     public void update(Set<Entity> entities, int level){};
 
     public void update(){};

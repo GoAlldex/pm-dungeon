@@ -1,5 +1,7 @@
 package ecs.entities.boss;
 
+import dslToGame.AnimationBuilder;
+import ecs.components.HealthComponent;
 import ecs.components.HitboxComponent;
 import ecs.components.PositionComponent;
 import ecs.components.ai.AIComponent;
@@ -7,7 +9,9 @@ import ecs.components.ai.AITools;
 import ecs.components.skill.Skill;
 import ecs.components.skill.SkillTools;
 import ecs.components.skill.ZombieSkill;
+import ecs.damage.Damage;
 import ecs.entities.Entity;
+import ecs.entities.Hero;
 import ecs.entities.Zombie;
 import ecs.components.skill.SlimeSkill;
 import starter.Game;
@@ -15,6 +19,8 @@ import tools.Constants;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+
+import static ecs.damage.DamageType.PHYSICAL;
 
 /**
  * @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
@@ -27,7 +33,6 @@ public class ZombieBoss extends Boss{
     private float schleimDMG = 0f;
     private float zombieDMG = 0.25f;
     private static int staticHPBalken;
-    private int heroXP = 0;
     private int heroDMG = 0;
     private float multi = 0.30f;
     private SlimeSkill slimeSkill;
@@ -62,8 +67,10 @@ public class ZombieBoss extends Boss{
      */
     private void setup() {
         this.position = new PositionComponent(this);
-        this.hp = Math.round( (45 * getLevel()) * (1.5f + ((float) getLevel() / 10) - 0.1f));
-        staticHPBalken = getHp();
+        this.hitAnimation = AnimationBuilder.buildAnimation("");
+        this.dieAnimation = AnimationBuilder.buildAnimation("monster/type2/boss/death");
+        this.hp = new HealthComponent(this, Math.round(45f*(1.5f+((float)getLevel()/10f)-0.1f)), this.death, this.hitAnimation, this.dieAnimation);
+        staticHPBalken = this.hp.getMaximalHealthpoints();
         this.speed[0] = zombieDMG * 0.8f;
         this.speed[1] = zombieDMG * 0.8f;
         setupAttack(6, multi, 0);
@@ -149,42 +156,44 @@ public class ZombieBoss extends Boss{
     private void setupHitboxZombie(){
         if (zombies != null){
             for (Zombie zombie : zombies) {
-                System.out.println("Zombie hp: " + zombie.getHp());
+                log.info("Zombie HP: " + zombie.getHp().getCurrentHealthpoints());
                 new HitboxComponent(
                     zombie,
                     (you, other, direction) -> {
                         if (other != zombie && other == hero){
-                           zombie.setHp(zombie.getHp() - (int)(getLevel() * 5.5f));
-                            info("skill2");
-                            System.out.println("Zombies hp nach attacke: " + zombie.getHp());
+                            Hero h = (Hero) hero;
+                            zombie.getHp().receiveHit(new Damage(((int)(getLevel()*5.5f)), PHYSICAL, h));
+                            info("Skill 2");
+                            log.info("Zombies HP after attack: " + zombie.getHp().getCurrentHealthpoints());
 
-                            if (zombie.getHp() <= 0){
-                                System.out.println("Zombie wurde besiegt!");
-                                heroXP += zombie.getXp();
-                                System.out.println("Hero XP sind jetzt: " + heroXP);
+                            if (zombie.getHp().getCurrentHealthpoints() <= 0){
+                                log.info("Zombie died!");
+                                h.getXP().addXP(zombie.getXp());
+                                log.info("Hero get "+zombie.getXp()+" XP");
                                 Game.removeEntity(zombie);
                             }
                         }
                     },
-                    (you, other, direction) -> System.out.println("Leave Zombie from Boss klass")
+                    (you, other, direction) -> log.info("Leave Zombie from Boss klass")
                 );
             }
         }
     }
 
     private void setupHitboxComponent() {
-        System.out.println("ZombieBoss hp: " + getHp());
+        log.info("ZombieBoss hp: " + getHp().getCurrentHealthpoints());
         new HitboxComponent(
             this,
             (you, other, direction) -> {
                 if (other != this && other == hero){
-                    this.hp -= getLevel() * 2.5f;
-                    System.out.println("ZombieBoss hp nach attacke: " + getHp());
-                    if (hp <= 0){
-                        System.out.println("Der ZombieBoss wurde besiegt!");
-                        heroXP += getXp();
-                        System.out.println("Hero XP sind jetzt: " + heroXP);
-                        System.out.println("Hero hat " + heroDMG + " damage's bekommen.");
+                    Hero h = (Hero) hero;
+                    this.hp.receiveHit(new Damage(((int)(getLevel() * 2.5f)), PHYSICAL, h));
+                    log.info("Zombie Boss HP after attack: " + getHp().getCurrentHealthpoints());
+                    if (hp.getCurrentHealthpoints() <= 0){
+                        log.info("Zombie Boss died.");
+                        h.getXP().addXP(getXp());
+                        log.info("Hero get "+getXp()+" XP");
+                        log.info("Hero get " + heroDMG + " DMG.");
                         Game.removeEntity(this);
                         Game.removeEntity(slimeSkill.getEntity());
                         if (zombies != null){
@@ -227,21 +236,21 @@ public class ZombieBoss extends Boss{
             assert skill2 != null;
             if (hit == 2){
                 if (!skill1.isOnCoolDown()){
-                    System.out.println("Skill 1 wird aktiviert!");
+                    log.info("Skill 1 active!");
                     skill1.execute(hero);
                     setupAttack(6f, multi + .25f, 1);
                     hit = 0;
-                    System.out.println("Skill 1 wurde aktiviert!");
+                    log.info("Skill 1 active!");
                     info("skill1");
                     skillaktivierung = true;
                     return;
                 }
                 if (skillaktivierung && !skill2.isOnCoolDown()){
-                    System.out.println("Skill 2 wird aktiviert!");
+                    log.info("Skill 2 active!");
                     skill2.execute(hero);
                     setupAttack(6f, multi + 0.25f, 2);
                     hit = 0;
-                    System.out.println("Skill 2 wurde aktiviert!");
+                    log.info("Skill 2  active!");
                     info("skill2");
                     hitboxZombie();
                     Game.removeEntity(slimeSkill.getEntity());
@@ -259,7 +268,7 @@ public class ZombieBoss extends Boss{
             if (hit == 2){
                 hit = 0;
             }
-            if (staticHPBalken / 2 < getHp()){
+            if (staticHPBalken / 2 < getHp().getCurrentHealthpoints()){
                 //setup2();
             }
         }
@@ -292,16 +301,16 @@ public class ZombieBoss extends Boss{
 
     private void info(String skill){
         if (skill.equalsIgnoreCase("skill1")){
-            System.out.println("Slime damage: " + schleimDMG);
-            System.out.println("ZombieBoss hat " + hp +"hp");
+            log.info("Slime damage: " + schleimDMG);
+            log.info("Zombie Boss has " + hp.getCurrentHealthpoints() +" HP");
             heroDMG += schleimDMG;
         } else if (skill.equalsIgnoreCase("skill2")) {
-            System.out.println("Zombie damage: " + zombieDMG);
-            System.out.println("ZombieBoss hat " + hp +"hp");
+            log.info("Zombie damage: " + zombieDMG);
+            log.info("Zombie Boss has " + hp.getCurrentHealthpoints() +" HP");
             heroDMG += zombieDMG;
         } else {
-            System.out.println("Damage: " + dmg);
-            System.out.println("ZombieBoss hat " + hp +"hp");
+            log.info("Damage: " + dmg);
+            log.info("Zombie Boss has " + hp.getCurrentHealthpoints() +" HP");
             heroDMG += dmg;
         }
     }
