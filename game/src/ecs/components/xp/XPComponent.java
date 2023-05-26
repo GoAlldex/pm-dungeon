@@ -95,10 +95,8 @@ public class XPComponent extends Component {
         if (this.callbackLevelUp != null) this.callbackLevelUp.onLevelUp(level);
     }
 
-    /**
-     * Level up hero
-     */
-    public void levelUp(){
+    /** Level up hero */
+    public void levelUp() {
         Hero hero = (Hero) entity;
         hero.lvlUP();
     }
@@ -106,7 +104,7 @@ public class XPComponent extends Component {
     /**
      * @param xp Loot xp for Hero
      */
-    public void setXP(long xp){
+    public void setXP(long xp) {
         Hero hero = (Hero) entity;
         hero.setLootXP(xp);
     }
@@ -149,9 +147,7 @@ public class XPComponent extends Component {
         return maxXP;
     }
 
-    /**
-     * Calculate maxXp for next level (20%)
-     */
+    /** Calculate maxXp for next level (20%) */
     public void getMaxXPToNextLevel() {
         this.currentXP = this.currentXP - this.maxXP;
         this.maxXP += ((maxXP * 20) / 100);

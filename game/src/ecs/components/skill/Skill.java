@@ -1,6 +1,5 @@
 package ecs.components.skill;
 
-import ecs.damage.Damage;
 import ecs.entities.Entity;
 import ecs.entities.Hero;
 import starter.Game;
@@ -31,18 +30,23 @@ public class Skill {
     public void execute(Entity entity) {
         if (!isOnCoolDown() && entity != null) {
             skillFunction.execute(entity);
-            if (Game.getHero().isPresent() && entity == Game.getHero().get()){
+            if (Game.getHero().isPresent() && entity == Game.getHero().get()) {
                 Hero hero = (Hero) entity;
-                if (hero.requiredLevel()){
+                if (hero.requiredLevel()) {
                     if (manaPoint > 0) {
-                        if (hero.getMc().getCurrentManaPoint() >= 0){
-                            hero.getMc().setCurrentManaPoint(hero.getMc().getCurrentManaPoint() - manaPoint);
+                        if (hero.getMc().getCurrentManaPoint() >= 0) {
+                            hero.getMc()
+                                    .setCurrentManaPoint(
+                                            hero.getMc().getCurrentManaPoint() - manaPoint);
                             System.out.println("HeroMana: " + hero.getMc().getCurrentManaPoint());
                         }
-                        if (hero.getHp().getCurrentHealthpoints() >= 0 && hero.getMc().getCurrentManaPoint() <= 0){
-                            hero.getHp().setCurrentHealthpoints(hero.getHp().getCurrentHealthpoints() - manaPoint);
+                        if (hero.getHp().getCurrentHealthpoints() >= 0
+                                && hero.getMc().getCurrentManaPoint() <= 0) {
+                            hero.getHp()
+                                    .setCurrentHealthpoints(
+                                            hero.getHp().getCurrentHealthpoints() - manaPoint);
                             System.out.println("HeroHP: " + hero.getHp().getCurrentHealthpoints());
-                            if (hero.getHp().getCurrentHealthpoints() <= 0){
+                            if (hero.getHp().getCurrentHealthpoints() <= 0) {
                                 hero.gameOver();
                             }
                         }
@@ -50,14 +54,19 @@ public class Skill {
                 }
 
                 if (manaPoint > 0 && !hero.requiredLevel()) {
-                    if (hero.getMc().getCurrentManaPoint() >= 0){
-                        hero.getMc().setCurrentManaPoint(hero.getMc().getCurrentManaPoint() - manaPoint);
+                    if (hero.getMc().getCurrentManaPoint() >= 0) {
+                        hero.getMc()
+                                .setCurrentManaPoint(
+                                        hero.getMc().getCurrentManaPoint() - manaPoint);
                         System.out.println("HeroMana: " + hero.getMc().getCurrentManaPoint());
                     }
-                    if (hero.getHp().getCurrentHealthpoints() >= 0 && hero.getMc().getCurrentManaPoint() <= 0){
-                        hero.getHp().setCurrentHealthpoints(hero.getHp().getCurrentHealthpoints() - manaPoint);
+                    if (hero.getHp().getCurrentHealthpoints() >= 0
+                            && hero.getMc().getCurrentManaPoint() <= 0) {
+                        hero.getHp()
+                                .setCurrentHealthpoints(
+                                        hero.getHp().getCurrentHealthpoints() - manaPoint);
                         System.out.println("HeroHP: " + hero.getHp().getCurrentHealthpoints());
-                        if (hero.getHp().getCurrentHealthpoints() <= 0){
+                        if (hero.getHp().getCurrentHealthpoints() <= 0) {
                             hero.gameOver();
                         }
                     }

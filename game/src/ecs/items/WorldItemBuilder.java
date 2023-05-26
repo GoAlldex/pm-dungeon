@@ -10,7 +10,6 @@ import tools.Point;
 /** Class which creates all needed Components for a basic WorldItem */
 public class WorldItemBuilder {
 
-
     /**
      * Creates an Entity which then can be added to the game
      *

@@ -8,10 +8,9 @@ import ecs.damage.DamageType;
 import ecs.entities.Entity;
 import ecs.entities.Hero;
 import graphic.Animation;
+import java.util.logging.Logger;
 import starter.Game;
 import tools.Point;
-
-import java.util.logging.Logger;
 
 public abstract class DamageProjectileSkill implements ISkillFunction {
 
@@ -67,13 +66,15 @@ public abstract class DamageProjectileSkill implements ISkillFunction {
     @Override
     public void execute(Entity entity) {
         Hero hero = (Hero) entity;
-        if (hero.getLevel() >= 3 && projectileDamage.damageType() == DamageType.MAGIC){
+        if (hero.getLevel() >= 3 && projectileDamage.damageType() == DamageType.MAGIC) {
             Entity projectile = new Entity();
             PositionComponent epc =
-                (PositionComponent)
-                    entity.getComponent(PositionComponent.class)
-                        .orElseThrow(
-                            () -> new MissingComponentException("PositionComponent"));
+                    (PositionComponent)
+                            entity.getComponent(PositionComponent.class)
+                                    .orElseThrow(
+                                            () ->
+                                                    new MissingComponentException(
+                                                            "PositionComponent"));
             new PositionComponent(projectile, epc.getPosition());
 
             Animation animation = AnimationBuilder.buildAnimation(pathToTexturesOfProjectile);
@@ -81,43 +82,46 @@ public abstract class DamageProjectileSkill implements ISkillFunction {
 
             Point aimedOn = selectionFunction.selectTargetPoint();
             Point targetPoint =
-                SkillTools.calculateLastPositionInRange(
-                    epc.getPosition(), aimedOn, projectileRange);
+                    SkillTools.calculateLastPositionInRange(
+                            epc.getPosition(), aimedOn, projectileRange);
             Point velocity =
-                SkillTools.calculateVelocity(epc.getPosition(), targetPoint, projectileSpeed);
+                    SkillTools.calculateVelocity(epc.getPosition(), targetPoint, projectileSpeed);
             VelocityComponent vc =
-                new VelocityComponent(projectile, velocity.x, velocity.y, animation, animation);
+                    new VelocityComponent(projectile, velocity.x, velocity.y, animation, animation);
             new ProjectileComponent(projectile, epc.getPosition(), targetPoint);
             ICollide collide =
-                (a, b, from) -> {
-                    if (b != entity) {
-                        b.getComponent(HealthComponent.class)
-                            .ifPresent(
-                                hc -> {
-                                    ((HealthComponent) hc).receiveHit(projectileDamage);
-                                    Game.removeEntity(projectile);
-                                });
-                    }
-                };
+                    (a, b, from) -> {
+                        if (b != entity) {
+                            b.getComponent(HealthComponent.class)
+                                    .ifPresent(
+                                            hc -> {
+                                                ((HealthComponent) hc).receiveHit(projectileDamage);
+                                                Game.removeEntity(projectile);
+                                            });
+                        }
+                    };
 
             new HitboxComponent(
-                projectile, new Point(0.25f, 0.25f), projectileHitboxSize, collide, null);
+                    projectile, new Point(0.25f, 0.25f), projectileHitboxSize, collide, null);
 
             hero.isOnAttack(true);
             requiredLevel = true;
-        }else {
+        } else {
             requiredLevel = false;
             hero.isOnAttack(false);
-            damageLogger.info("Dein Level ist zu niedrig!!! ("+getClass().getSimpleName()+")");
+            damageLogger.info("Dein Level ist zu niedrig!!! (" + getClass().getSimpleName() + ")");
         }
 
-        if (projectileDamage.damageType() != DamageType.MAGIC && hero.getHp().getCurrentHealthpoints() >= 0){
+        if (projectileDamage.damageType() != DamageType.MAGIC
+                && hero.getHp().getCurrentHealthpoints() >= 0) {
             Entity projectile = new Entity();
             PositionComponent epc =
-                (PositionComponent)
-                    entity.getComponent(PositionComponent.class)
-                        .orElseThrow(
-                            () -> new MissingComponentException("PositionComponent"));
+                    (PositionComponent)
+                            entity.getComponent(PositionComponent.class)
+                                    .orElseThrow(
+                                            () ->
+                                                    new MissingComponentException(
+                                                            "PositionComponent"));
             new PositionComponent(projectile, epc.getPosition());
 
             Animation animation = AnimationBuilder.buildAnimation(pathToTexturesOfProjectile);
@@ -125,37 +129,37 @@ public abstract class DamageProjectileSkill implements ISkillFunction {
 
             Point aimedOn = selectionFunction.selectTargetPoint();
             Point targetPoint =
-                SkillTools.calculateLastPositionInRange(
-                    epc.getPosition(), aimedOn, projectileRange);
+                    SkillTools.calculateLastPositionInRange(
+                            epc.getPosition(), aimedOn, projectileRange);
             Point velocity =
-                SkillTools.calculateVelocity(epc.getPosition(), targetPoint, projectileSpeed);
+                    SkillTools.calculateVelocity(epc.getPosition(), targetPoint, projectileSpeed);
             VelocityComponent vc =
-                new VelocityComponent(projectile, velocity.x, velocity.y, animation, animation);
+                    new VelocityComponent(projectile, velocity.x, velocity.y, animation, animation);
             new ProjectileComponent(projectile, epc.getPosition(), targetPoint);
             ICollide collide =
-                (a, b, from) -> {
-                    if (b != entity) {
-                        b.getComponent(HealthComponent.class)
-                            .ifPresent(
-                                hc -> {
-                                    ((HealthComponent) hc).receiveHit(projectileDamage);
-                                    Game.removeEntity(projectile);
-                                });
-                    }
-                };
+                    (a, b, from) -> {
+                        if (b != entity) {
+                            b.getComponent(HealthComponent.class)
+                                    .ifPresent(
+                                            hc -> {
+                                                ((HealthComponent) hc).receiveHit(projectileDamage);
+                                                Game.removeEntity(projectile);
+                                            });
+                        }
+                    };
 
             new HitboxComponent(
-                projectile, new Point(0.25f, 0.25f), projectileHitboxSize, collide, null);
+                    projectile, new Point(0.25f, 0.25f), projectileHitboxSize, collide, null);
             hero.isOnAttack(true);
         }
     }
 
     /**
      * Ist erforderliches Level erreicht
-     * @return true, Skill wurde ausgeführt, false der Level war
-     *          zu niedrig.
+     *
+     * @return true, Skill wurde ausgeführt, false der Level war zu niedrig.
      */
-    public boolean isRequiredLevel(){
+    public boolean isRequiredLevel() {
         return requiredLevel;
     }
 }

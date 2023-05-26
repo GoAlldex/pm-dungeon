@@ -13,19 +13,18 @@ import configuration.KeyboardConfig;
 import controller.AbstractController;
 import controller.SystemController;
 import creature.trap.*;
-import ecs.entities.boss.OrcBoss;
-import ecs.items.WorldItemBuilder;
-import graphic.hud.GameOver;
 import ecs.components.MissingComponentException;
 import ecs.components.PositionComponent;
 import ecs.entities.*;
 import ecs.entities.boss.BiterBoss;
 import ecs.entities.boss.Boss;
+import ecs.entities.boss.OrcBoss;
 import ecs.entities.boss.ZombieBoss;
 import ecs.items.ItemDataGenerator;
 import ecs.systems.*;
 import graphic.DungeonCamera;
 import graphic.Painter;
+import graphic.hud.GameOver;
 import graphic.hud.PauseMenu;
 import java.io.IOException;
 import java.util.*;
@@ -89,7 +88,7 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
     private ArrayList<Entity> inventory = new ArrayList<>();
     private static ArrayList<NPC> npcs = new ArrayList<>();
     private static Tomb tomb = null;
-    public static  ArrayList<Boss> bosses = new ArrayList<>();
+    public static ArrayList<Boss> bosses = new ArrayList<>();
 
     public static void main(String[] args) {
         // start the game
@@ -142,53 +141,54 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
 
     /** Called at the beginning of each frame. Before the controllers call <code>update</code>. */
     protected void frame() {
-        if(Gdx.input.isKeyJustPressed(Input.Keys.B)) {
-            if(inventoryOpen == false) {
-                //inventory.add(WorldInventoryBuilder.buildWorldInventory(hero.getInventory(), new Point(0,0)));
+        if (Gdx.input.isKeyJustPressed(Input.Keys.B)) {
+            if (inventoryOpen == false) {
+                // inventory.add(WorldInventoryBuilder.buildWorldInventory(hero.getInventory(), new
+                // Point(0,0)));
             } else {
-                //inventory.clear();
+                // inventory.clear();
             }
         }
         setCameraFocus();
         manageEntitiesSets();
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) togglePause();
-        if (hero != null && getHero().isPresent()){
+        if (hero != null && getHero().isPresent()) {
             Hero hero1 = (Hero) hero;
-            if (hero1.pc != null){
-                //Skill 1 - Fireball
+            if (hero1.pc != null) {
+                // Skill 1 - Fireball
                 if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
                     if (hero1.pc.getSkillSlot1().isPresent())
                         hero1.execute(hero1.pc.getSkillSlot1().get());
                 }
-                //Skill 2 - Blitzschlag
+                // Skill 2 - Blitzschlag
                 if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
                     if (hero1.pc.getSkillSlot2().isPresent())
                         hero1.execute(hero1.pc.getSkillSlot2().get());
                 }
-                //Skill 3 - Verwandlung
+                // Skill 3 - Verwandlung
                 if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
                     if (hero1.pc.getSkillSlot3().isPresent())
                         hero1.execute(hero1.pc.getSkillSlot3().get());
                 }
-                //Skill 4 Boss Informationen
+                // Skill 4 Boss Informationen
                 if (Gdx.input.isKeyJustPressed(Input.Keys.F4)) {
                     if (hero1.pc.getSkillSlot4().isPresent())
                         hero1.execute(hero1.pc.getSkillSlot4().get());
                 }
-                //soldange nicht gameover ist, Rufe die methode
-                //update auf
-                if (!hero1.isGameOver()){
+                // soldange nicht gameover ist, Rufe die methode
+                // update auf
+                if (!hero1.isGameOver()) {
                     hero1.update();
                     for (Boss boss : bosses) {
-                        if (entities.contains(boss)){
+                        if (entities.contains(boss)) {
                             boss.update(entities, levelCounter);
                         }
                     }
                 }
-                //wenn gameover und hero noch da ist,
-                //Lösche es
-                if (hero1.isGameOver()){
-                    if (Game.getHero().isPresent()){
+                // wenn gameover und hero noch da ist,
+                // Lösche es
+                if (hero1.isGameOver()) {
+                    if (Game.getHero().isPresent()) {
                         levelCounter = 0;
                         entities.clear();
                         bosses.clear();
@@ -198,16 +198,16 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
                     }
                 }
             }
-            //Neustart
-            if (isGameOver){
-                if (Gdx.input.isKeyJustPressed(Input.Keys.R)){
+            // Neustart
+            if (isGameOver) {
+                if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
                     hero = new Hero();
                     levelAPI.loadLevel(LEVELSIZE);
                     gameOver();
                 }
             }
-            if (Game.getHero().isPresent()){
-                if (Gdx.input.isKeyJustPressed(Input.Keys.I)){
+            if (Game.getHero().isPresent()) {
+                if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
                     assert hero1 != null;
                     hero1.info();
                 }
@@ -234,28 +234,29 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         Random rnd = new Random();
         int rnd_mon_anz = rnd.nextInt(4);
         rnd_mon_anz++;
-        for(int i = 0; i < rnd_mon_anz; i++) {
+        for (int i = 0; i < rnd_mon_anz; i++) {
             int rnd_mon = new Random().nextInt(3);
-            if(rnd_mon == 0) {
-                monster.add(new Biter(levelCounter));
-            } else if(rnd_mon == 1) {
-                monster.add(new Zombie(levelCounter));
+            if (rnd_mon == 0) {
+                // monster.add(new Biter(levelCounter));
+            } else if (rnd_mon == 1) {
+                // monster.add(new Zombie(levelCounter));
             } else {
-                monster.add(new LittleDragon(levelCounter));
+                // monster.add(new LittleDragon(levelCounter));
             }
         }
         int rnd_itm_anz = rnd.nextInt(2);
         rnd_itm_anz++;
         ItemDataGenerator itm = new ItemDataGenerator();
-        for(int i = 0; i < rnd_itm_anz; i++) {
-            worldItems.add(WorldItemBuilder.buildWorldItem(itm.generateItemData(), currentLevel.getRandomFloorTile().getCoordinate().toPoint()));
+        for (int i = 0; i < rnd_itm_anz; i++) {
+            // worldItems.add(WorldItemBuilder.buildWorldItem(itm.generateItemData(),
+            // currentLevel.getRandomFloorTile().getCoordinate().toPoint()));
         }
         int randomNumberTraps = new Random().nextInt(2);
         for (int i = 0; i < randomNumberTraps; i++) {
-            //trapGenerator
-            trapGenerators.add(new SpikesTrap(currentLevel.getFloorTiles()));
-            trapGenerators.add(new TeleportTrap(currentLevel.getFloorTiles(), hero));
-            trapGenerators.add(new SpawnTrap(currentLevel.getFloorTiles(), levelCounter));
+            // trapGenerator
+            // trapGenerators.add(new SpikesTrap(currentLevel.getFloorTiles()));
+            // trapGenerators.add(new TeleportTrap(currentLevel.getFloorTiles(), hero));
+            // trapGenerators.add(new SpawnTrap(currentLevel.getFloorTiles(), levelCounter));
         }
         getTraps().ifPresent(this::placeForTraps);
         getHero().ifPresent(this::placeOnLevelStart);
@@ -270,18 +271,19 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         return Optional.empty();
     }
 
-    private void placeForTraps(Entity entity){
+    private void placeForTraps(Entity entity) {
         for (TrapGenerator trap : trapGenerators) {
-            if (trap.visibility())
-                trap.visibility(false);
+            if (trap.visibility()) trap.visibility(false);
         }
         entities.addAll(trapGenerators);
         for (TrapGenerator trap : trapGenerators) {
             PositionComponent pc =
-                (PositionComponent)
-                    trap.getComponent(PositionComponent.class)
-                        .orElseThrow(
-                            () -> new MissingComponentException("PositionComponent"));
+                    (PositionComponent)
+                            trap.getComponent(PositionComponent.class)
+                                    .orElseThrow(
+                                            () ->
+                                                    new MissingComponentException(
+                                                            "PositionComponent"));
             trap.setFloorTiles(currentLevel.getFloorTiles());
             trap.generatePosition();
             pc.setPosition(trap.position().getPosition());
@@ -339,22 +341,26 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
                                 .orElseThrow(
                                         () -> new MissingComponentException("PositionComponent"));
         pc.setPosition(currentLevel.getStartTile().getCoordinate().toPoint());
-        for(Monster m : monster) {
+        for (Monster m : monster) {
             entities.add(m);
             PositionComponent npc =
-                (PositionComponent)
-                    m.getComponent(PositionComponent.class)
-                        .orElseThrow(
-                            () -> new MissingComponentException("PositionComponent"));
+                    (PositionComponent)
+                            m.getComponent(PositionComponent.class)
+                                    .orElseThrow(
+                                            () ->
+                                                    new MissingComponentException(
+                                                            "PositionComponent"));
             npc.setPosition(currentLevel.getRandomFloorTile().getCoordinate().toPoint());
         }
-        for(NPC n : npcs) {
+        for (NPC n : npcs) {
             entities.add(n);
             PositionComponent npc =
-                (PositionComponent)
-                    n.getComponent(PositionComponent.class)
-                        .orElseThrow(
-                            () -> new MissingComponentException("PositionComponent"));
+                    (PositionComponent)
+                            n.getComponent(PositionComponent.class)
+                                    .orElseThrow(
+                                            () ->
+                                                    new MissingComponentException(
+                                                            "PositionComponent"));
             npc.setPosition(currentLevel.getRandomFloorTile().getCoordinate().toPoint());
         }
         entities.add(tomb);
@@ -370,13 +376,12 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         bosses.add(orcBoss);
     }
 
-    private PositionComponent getPositionComponent(Entity entity){
+    private PositionComponent getPositionComponent(Entity entity) {
         PositionComponent position =
-            (PositionComponent)
-                entity.getComponent(PositionComponent.class)
-                    .orElseThrow(
-                        () -> new MissingComponentException("PositionComponent")
-                    );
+                (PositionComponent)
+                        entity.getComponent(PositionComponent.class)
+                                .orElseThrow(
+                                        () -> new MissingComponentException("PositionComponent"));
         addEntity(entity);
         return position;
     }
@@ -393,12 +398,12 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         }
     }
 
-    public static void gameOver(){
+    public static void gameOver() {
         isGameOver = !isGameOver;
-        if (systems != null){
+        if (systems != null) {
             systems.forEach(ECS_System::toggleRun);
         }
-        if (gameOver != null){
+        if (gameOver != null) {
             if (isGameOver) gameOver.showGameOver();
             else gameOver.hideGameOver();
         }
