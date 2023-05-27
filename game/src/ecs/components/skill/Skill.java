@@ -92,4 +92,5 @@ public class Skill {
     public void reduceCoolDown() {
         currentCoolDownInFrames = Math.max(0, --currentCoolDownInFrames);
     }
+
 }

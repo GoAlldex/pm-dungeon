@@ -27,11 +27,20 @@ public class Hero extends Entity {
     private MindControlSkill mindControlSkill;
     private float xSpeed = 0.3f;
     private float ySpeed = 0.3f;
+    private final int arrowCoolDown = 1;
+    private final int boomerangCoolDown = 2;
 
-    private String pathToIdleLeft = "knight/idleLeft";
-    private String pathToIdleRight = "knight/idleRight";
-    private String pathToRunLeft = "knight/runLeft";
-    private String pathToRunRight = "knight/runRight";
+    private final String pathToIdleLeft = "knight/idleLeft";
+    private final String pathToIdleRight = "knight/idleRight";
+    private final String pathToRunLeft = "knight/runLeft";
+    private final String pathToRunRight = "knight/runRight";
+
+    private Skill skill5 = new Skill(
+        new ArrowSkill(SkillTools::getCursorPositionAsPoint), arrowCoolDown, 3);
+
+    private Skill skill6 = new Skill(
+        new BoomerangSkill(SkillTools::getCursorPositionAsPoint), boomerangCoolDown, 3);
+
     private Skill firstSkill, secondSkill, thirdSkill, fourthSkill;
     private InventoryComponent inventory;
     int cd = 30;
@@ -66,6 +75,8 @@ public class Hero extends Entity {
         pc.setSkillSlot2(secondSkill);
         pc.setSkillSlot3(thirdSkill);
         pc.setSkillSlot4(fourthSkill);
+        pc.setSkillSlot5(skill5);
+        pc.setSkillSlot6(skill6);
         setDefaultItems();
     }
 
@@ -161,6 +172,10 @@ public class Hero extends Entity {
      */
     @Override
     public void update() {
+        skill1_4();
+    }
+
+    private void skill1_4() {
         long timerForLightningEnd = System.currentTimeMillis();
         if (secondSkill.isOnCoolDown()) {
             long timer = (timerForLightningEnd - timerForLightningStart) / (60 * 60);
@@ -343,23 +358,6 @@ public class Hero extends Entity {
         System.out.println("CurrentLevel: " + xp.getCurrentLevel());
         if (mc.getCurrentManaPoint() <= 0) mc.setCurrentManaPoint(0);
         System.out.println("Mana: " + mc.getCurrentManaPoint() + " von " + mc.getMaxManaPoint());
-    }
-
-    /** Set pathTo animation */
-    public void setPathToIdleLeft(String left) {
-        this.pathToIdleLeft = left;
-    }
-
-    public void setPathToIdleRight(String right) {
-        this.pathToIdleRight = right;
-    }
-
-    public void setPathToRunLeft(String runLeft) {
-        this.pathToRunLeft = runLeft;
-    }
-
-    public void setPathToRunRight(String runRight) {
-        this.pathToRunRight = runRight;
     }
 
     public String getPathToIdleLeft() {
