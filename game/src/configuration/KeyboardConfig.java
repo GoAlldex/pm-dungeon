@@ -19,7 +19,16 @@ public class KeyboardConfig {
     public static final ConfigKey<Integer> INTERACT_WORLD =
             new ConfigKey<>(new String[] {"interact", "world"}, new ConfigIntValue(Input.Keys.E));
     public static final ConfigKey<Integer> FIRST_SKILL =
-            new ConfigKey<>(new String[] {"skill", "first"}, new ConfigIntValue(Input.Keys.Q));
+            new ConfigKey<>(new String[] {"skill", "first"}, new ConfigIntValue(Input.Keys.F1));
     public static final ConfigKey<Integer> SECOND_SKILL =
-            new ConfigKey<>(new String[] {"skill", "second"}, new ConfigIntValue(Input.Keys.R));
+            new ConfigKey<>(new String[] {"skill", "second"}, new ConfigIntValue(Input.Keys.F2));
+    public static final ConfigKey<Integer> THIRD_SKILL =
+        new ConfigKey<>(new String[] {"skill", "third"}, new ConfigIntValue(Input.Keys.F3));
+
+    public static final ConfigKey<Integer> FOURTH_SKILL =
+        new ConfigKey<>(new String[] {"skill", "fourth"}, new ConfigIntValue(Input.Keys.F4));
+    public static final ConfigKey<Integer> FIFTH_SKILL =
+        new ConfigKey<>(new String[] {"skill", "fifth"}, new ConfigIntValue(Input.Keys.R));
+    public static final ConfigKey<Integer> SIXTH_SKILL =
+        new ConfigKey<>(new String[] {"skill", "sixth"}, new ConfigIntValue(Input.Keys.T));
 }

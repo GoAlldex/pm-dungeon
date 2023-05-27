@@ -8,24 +8,26 @@ import starter.Game;
 import tools.Point;
 
 /**
- <b><span style="color: rgba(3,71,134,1);">Idle AI Strategie.</span></b><br>
- Hier wird der Idle Zustand einer Entity definiert.<br><br>
-
- @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
- @version cycle_1
- @since 26.04.2023
+ * <b><span style="color: rgba(3,71,134,1);">Idle AI Strategie.</span></b><br>
+ * Hier wird der Idle Zustand einer Entity definiert.<br>
+ * <br>
+ *
+ * @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+ * @version cycle_1
+ * @since 26.04.2023
  */
 public class Idle implements IIdleAI {
 
     private boolean initialized = false;
 
     /**
-     <b><span style="color: rgba(3,71,134,1);">Konstruktor</span></b><br>
-     Nicht benötigt, da sich die Entity passiv verhalten soll.<br><br>
-
-     @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
-     @version cycle_1
-     @since 26.04.2023
+     * <b><span style="color: rgba(3,71,134,1);">Konstruktor</span></b><br>
+     * Nicht benötigt, da sich die Entity passiv verhalten soll.<br>
+     * <br>
+     *
+     * @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+     * @version cycle_1
+     * @since 26.04.2023
      */
     public Idle() {}
 
@@ -38,14 +40,14 @@ public class Idle implements IIdleAI {
                                         () -> new MissingComponentException("PositionComponent"));
         Point center = position.getPosition();
         Tile tile = Game.currentLevel.getTileAt(position.getPosition().toCoordinate());
-        if(tile == null) {
+        if (tile == null) {
             return;
         }
     }
 
     @Override
     public void idle(Entity entity) {
-        if(!initialized) this.init(entity);
+        if (!initialized) this.init(entity);
         PositionComponent position =
                 (PositionComponent)
                         entity.getComponent(PositionComponent.class)

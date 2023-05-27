@@ -1,16 +1,11 @@
 package ecs.entities;
 
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import ecs.components.Component;
-
-import java.util.ArrayList;
+import ecs.components.InventoryComponent;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
-
-import ecs.components.InventoryComponent;
-import graphic.hud.PauseMenu;
 import semanticAnalysis.types.DSLContextPush;
 import semanticAnalysis.types.DSLType;
 import starter.Game;
@@ -60,6 +55,8 @@ public class Entity {
     }
 
     public void update(Set<Entity> entities){};
+
+    public void update(int level){};
 
     public void update(Set<Entity> entities, int level){};
 

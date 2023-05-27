@@ -9,16 +9,16 @@ import ecs.components.ai.idle.PatrouilleWalk;
 import ecs.components.ai.idle.RadiusWalk;
 import ecs.components.ai.idle.StaticRadiusWalk;
 import graphic.Animation;
-
 import java.util.Random;
 
 /**
- <b><span style="color: rgba(3,71,134,1);">Unsere NPC-Klasse "Geist".</span></b><br>
- Hier werden die wichtigesten bestandteile unseres NPC "Geist" initialisiert.<br><br>
-
- @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
- @version cycle_2
- @since 08.05.2023
+ * <b><span style="color: rgba(3,71,134,1);">Unsere NPC-Klasse "Geist".</span></b><br>
+ * Hier werden die wichtigesten bestandteile unseres NPC "Geist" initialisiert.<br>
+ * <br>
+ *
+ * @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+ * @version cycle_2
+ * @since 08.05.2023
  */
 public class Ghost extends NPC {
 
@@ -31,11 +31,12 @@ public class Ghost extends NPC {
     private boolean tomb = false;
 
     /**
-     <b><span style="color: rgba(3,71,134,1);">Konstruktor</span></b><br>
-     Initialisiert ein neuen NPC "Geist".
-     @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
-     @version cycle_2
-     @since 08.05.2023
+     * <b><span style="color: rgba(3,71,134,1);">Konstruktor</span></b><br>
+     * Initialisiert ein neuen NPC "Geist".
+     *
+     * @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+     * @version cycle_2
+     * @since 08.05.2023
      */
     public Ghost() {
         super();
@@ -56,12 +57,14 @@ public class Ghost extends NPC {
     private void monsterMoveStrategy() {
         Random rnd = new Random();
         int strategy = rnd.nextInt(4);
-        int radius = rnd.nextInt(8)+2;
-        int checkPoints = rnd.nextInt(3)+2;
-        int pauseTime = rnd.nextInt(5)+1;
-        switch(strategy) {
+        int radius = rnd.nextInt(8) + 2;
+        int checkPoints = rnd.nextInt(3) + 2;
+        int pauseTime = rnd.nextInt(5) + 1;
+        switch (strategy) {
             case 0:
-                this.ai.setIdleAI(new PatrouilleWalk(radius, checkPoints, pauseTime, PatrouilleWalk.MODE.LOOP));
+                this.ai.setIdleAI(
+                        new PatrouilleWalk(
+                                radius, checkPoints, pauseTime, PatrouilleWalk.MODE.LOOP));
                 break;
             case 1:
                 this.ai.setIdleAI(new RadiusWalk(radius, pauseTime));
@@ -86,11 +89,15 @@ public class Ghost extends NPC {
 
     @Override
     public void update() {
-        if(!isTomb()) {
+        if (!isTomb()) {
             this.frameCounter++;
             if (this.frameCounter == this.invisibleFrames) {
                 setVisible(false);
-                this.ani = new AnimationComponent(this, AnimationBuilder.buildAnimation(this.empty), AnimationBuilder.buildAnimation(this.empty));
+                this.ani =
+                        new AnimationComponent(
+                                this,
+                                AnimationBuilder.buildAnimation(this.empty),
+                                AnimationBuilder.buildAnimation(this.empty));
             }
             if (this.frameCounter == (this.invisibleFrames * 2)) {
                 setVisible(true);
@@ -98,7 +105,7 @@ public class Ghost extends NPC {
                 this.frameCounter = 0;
             }
         } else {
-            if(!isVisible()) {
+            if (!isVisible()) {
                 setVisible(true);
                 setupAnimationComponent();
                 this.frameCounter = 0;
@@ -123,7 +130,7 @@ public class Ghost extends NPC {
     }
 
     public void setToTomb(PositionComponent position) {
-        if(!this.tomb) {
+        if (!this.tomb) {
             this.speed[0] = 0;
             this.speed[1] = 0;
             setupVelocityComponent();
@@ -131,5 +138,4 @@ public class Ghost extends NPC {
             this.tomb = true;
         }
     }
-
 }

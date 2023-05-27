@@ -3,6 +3,12 @@ package ecs.entities;
 import ecs.components.*;
 import ecs.components.ai.AIComponent;
 import ecs.items.ItemData;
+import ecs.systems.MyFormatter;
+import graphic.Animation;
+
+import java.io.IOException;
+import java.util.logging.*;
+import starter.Game;
 
 /**
  <b><span style="color: rgba(3,71,134,1);">Unsere Grund Monsterklasse, die alle Monster erben.</span></b><br>
@@ -24,12 +30,13 @@ import ecs.items.ItemData;
  */
 public abstract class Monster extends Entity {
 
-    protected int hp;
-    //protected HealthComponent hp;
+    //protected int hp;
+    protected HealthComponent hp;
     protected long xp;
     protected int dmg;
     protected int dmgType;
     protected float[] speed = new float[2];
+    protected boolean fight = false;
     protected PositionComponent position;
     protected String pathToIdleLeft;
     protected String pathToIdleRight;
@@ -37,7 +44,42 @@ public abstract class Monster extends Entity {
     protected String pathToRunRight;
     protected AIComponent ai;
     protected ItemData item;
+    protected boolean dropItem = false;
     protected IOnDeathFunction death;
+    protected Hero hero = null;
+    protected int hitSpeed;
+    protected int hitPause = 0;
+    protected int frameTime;
+    protected Animation hitAnimation;
+    protected Animation dieAnimation;
+    protected AnimationComponent monsterAnimation;
+
+    protected static final Logger log = Logger.getLogger(Biter.class.getName());
+
+    /**
+     <b><span style="color: rgba(3,71,134,1);">Logger für das Monster Beißer</span></b><br>
+     Loggen der Beißer  Ereignisse in der Datei Biter.txt im Ordner Logs.<br>
+
+     @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+     @version cycle_3
+     @since 21.05.2023
+     */
+    public static void MonsterLogs(){
+        Handler fileHandler = null;
+        try {
+            fileHandler = new FileHandler("logs/log_Monster.txt",true);
+            fileHandler.setLevel(Level.ALL);
+            fileHandler.setFormatter(new MyFormatter("Monster"));
+            log.addHandler(fileHandler);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ConsoleHandler consoleHandler = new ConsoleHandler();
+        consoleHandler.setLevel(Level.INFO);
+        consoleHandler.setFormatter(new MyFormatter("Monster"));
+        log.addHandler(consoleHandler);
+        log.setUseParentHandlers(false);
+    }
 
     /**
      <b><span style="color: rgba(3,71,134,1);">Monster HP Menge</span></b><br>
@@ -47,12 +89,14 @@ public abstract class Monster extends Entity {
      @version cycle_1
      @since 26.04.2023
      */
-    public int getHp() {
+
+    public HealthComponent getHp() {
         return this.hp;
     }
-    /*public int getHp() {
-        return this.hp.getCurrentHealthpoints();
-    }*/
+
+    public void setHp(int hp) {
+        this.hp.setMaximalHealthpoints(hp);
+    }
 
     /**
      <b><span style="color: rgba(3,71,134,1);">Monster XP Menge</span></b><br>

@@ -4,17 +4,16 @@ import dslToGame.AnimationBuilder;
 import ecs.components.AnimationComponent;
 import ecs.entities.Entity;
 import graphic.Animation;
+import java.util.List;
 import level.elements.tile.FloorTile;
 
-import java.util.List;
-
-public class TeleportTrap extends TrapGenerator{
+public class TeleportTrap extends TrapGenerator {
     private static final String teleportPath = FLOORPATH + "teleport.png";
     private static final String illusionPath = FLOORPATH + "floor_1.png";
 
     private Entity entity;
 
-    public TeleportTrap(List<FloorTile> floorTiles, Entity entity){
+    public TeleportTrap(List<FloorTile> floorTiles, Entity entity) {
         super();
         this.entity = entity;
         setFloorTiles(floorTiles);
@@ -27,27 +26,27 @@ public class TeleportTrap extends TrapGenerator{
 
     @Override
     public Animation animation() {
-        return visibility() ?  showTrap() : hiddenTrap();
+        return visibility() ? showTrap() : hiddenTrap();
     }
 
     @Override
-    public Animation showTrap(){
+    public Animation showTrap() {
         if (visibility()) {
             Animation animation = AnimationBuilder.buildAnimation(teleportPath);
             new AnimationComponent(this, animation);
             return animation;
-        }else {
+        } else {
             return hiddenTrap();
         }
     }
 
     @Override
-    public Animation hiddenTrap(){
+    public Animation hiddenTrap() {
         if (!visibility()) {
             Animation animation = AnimationBuilder.buildAnimation(illusionPath);
             new AnimationComponent(this, animation);
             return animation;
-        }else {
+        } else {
             return showTrap();
         }
     }

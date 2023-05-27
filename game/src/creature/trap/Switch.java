@@ -6,33 +6,32 @@ import ecs.components.HitboxComponent;
 import ecs.components.PositionComponent;
 import ecs.entities.Entity;
 import graphic.Animation;
+import java.util.List;
+import java.util.Random;
 import level.elements.tile.WallTile;
 import level.tools.Coordinate;
 import tools.Point;
-
-import java.util.List;
-import java.util.Random;
 
 /**
  * @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
  * @version cycle_1
  */
-public class Switch extends Entity{
+public class Switch extends Entity {
     private PositionComponent position;
     private Animation worldAnimation;
     private Trap trap;
 
     private List<WallTile> wallTiles;
 
-    public Switch(List<WallTile> wallTiles){
+    public Switch(List<WallTile> wallTiles) {
         this.wallTiles = wallTiles;
     }
 
-    public void position(Entity entity){
+    public void position(Entity entity) {
         generatePosition();
     }
 
-    private void generatePosition(){
+    private void generatePosition() {
         Coordinate[] coordinates = new Coordinate[wallTiles.size()];
         for (int i = 0; i < coordinates.length; i++) {
             coordinates[i] = wallTiles.get(i).getCoordinate();
@@ -43,18 +42,18 @@ public class Switch extends Entity{
         position.setPosition(new Point(coordinates[index].toPoint()));
     }
 
-    public void animation(){
-        //Beispiel
-        worldAnimation = AnimationBuilder.buildAnimation(TrapGenerator.FLOORPATH + "monsterTrap.png");
+    public void animation() {
+        // Beispiel
+        worldAnimation =
+                AnimationBuilder.buildAnimation(TrapGenerator.FLOORPATH + "monsterTrap.png");
         new AnimationComponent(this, worldAnimation);
     }
 
-    public void trap(){
+    public void trap() {
         new HitboxComponent(
-            this,
-            (you, other, direction) -> trap.setTrigegr(true),
-            (you, other, direction) -> System.out.println("Leave..." + getClass().getSimpleName())
-        );
+                this,
+                (you, other, direction) -> trap.setTrigegr(true),
+                (you, other, direction) ->
+                        System.out.println("Leave..." + getClass().getSimpleName()));
     }
-
 }
