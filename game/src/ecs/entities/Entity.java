@@ -54,17 +54,15 @@ public class Entity {
         return Optional.ofNullable(components.get(klass));
     }
 
-    public void update(Set<Entity> entities) {}
-    ;
+    public void update(Set<Entity> entities){};
 
-    public void update(Set<Entity> entities, int level) {}
-    ;
+    public void update(int level){};
 
-    public void update() {}
-    ;
+    public void update(Set<Entity> entities, int level){};
+
+    public void update(){};
 
     public InventoryComponent getInventory() {
         return null;
-    }
-    ;
+    };
 }
