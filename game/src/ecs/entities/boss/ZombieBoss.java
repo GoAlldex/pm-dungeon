@@ -14,6 +14,8 @@ import ecs.items.ItemData;
 import ecs.items.ItemDataGenerator;
 import java.util.*;
 import java.util.logging.Logger;
+
+import graphic.Animation;
 import starter.Game;
 
 /**
@@ -33,6 +35,7 @@ public class ZombieBoss extends Boss {
     private SlimeSkill slimeSkill;
     private static boolean init = false;
     private ArrayList<Zombie> zombies = new ArrayList<>();
+    private Animation dieAnimation = AnimationBuilder.buildAnimation("monster/type2/boss/death");
 
     /**
      * Konstruktor
@@ -68,7 +71,7 @@ public class ZombieBoss extends Boss {
         this.hp.setMaximalHealthpoints(100);
         this.hp.setCurrentHealthpoints(
                 Math.round((45 * getLevel()) * (1.5f + ((float) getLevel() / 10) - 0.1f)));
-        staticHPBalken = getHp();
+        staticHPBalken = getHp().getMaximalHealthpoints();
         this.speed[0] = zombieDMG * 0.8f;
         this.speed[1] = zombieDMG * 0.8f;
         setupAttack(1, multi, 0);
@@ -151,17 +154,16 @@ public class ZombieBoss extends Boss {
         if (zombies != null) {
             for (Zombie zombie : zombies) {
                 HealthComponent hc = new HealthComponent(zombie);
-                hc.setDieAnimation(
-                        AnimationBuilder.buildAnimation(zombie.getAnimationPath("left")));
+                hc.setDieAnimation(dieAnimation);
                 bossLogger.info("Zombie hp " + zombie.getHp());
                 new HitboxComponent(
                         zombie,
                         (you, other, direction) -> {
                             if (other != zombie && other == hero) {
-                                zombie.setHp(zombie.getHp() - (int) (getLevel() * 5.5f));
+                                zombie.setHp(zombie.getHp().getCurrentHealthpoints() - (int) (getLevel() * 5.5f));
                                 info("skill2");
                                 bossLogger.info("Zombie hp nach attacke: " + zombie.getHp());
-                                if (zombie.getHp() <= 0) {
+                                if (zombie.getHp().getCurrentHealthpoints() <= 0) {
                                     bossLogger.info("Zombie wurde besiegt");
                                     heroXP += zombie.getXp();
                                     bossLogger.info("Hero XP sind jetzt: " + heroXP);
@@ -246,9 +248,6 @@ public class ZombieBoss extends Boss {
             if (hit == 2) {
                 hit = 0;
             }
-            if (staticHPBalken / 2 < getHp()) {
-                // setup2();
-            }
         }
         if (hit < 2) {
             setupAttack(8f, multi + 0.25f, 0);
@@ -289,7 +288,7 @@ public class ZombieBoss extends Boss {
     @Override
     public void update(Set<Entity> entities, int level) {
         long timerEnd = System.currentTimeMillis();
-        if (getHp() >= 0) {
+        if (getHp().getMaximalHealthpoints() >= 0) {
             if (collision) {
                 if ((timerEnd - timerStart) / (60 * 60) == 1) {
                     attack();
@@ -306,11 +305,11 @@ public class ZombieBoss extends Boss {
         Hero tem = (Hero) hero;
         if (tem.getHp() != null) {
             bossLogger.info("ZombieBoss hat " + tem.damage() + " damage's!");
-            this.hp.setCurrentHealthpoints(getHp() - getLevel() * (int) tem.damage());
+            this.hp.setCurrentHealthpoints(getHp().getCurrentHealthpoints() - getLevel() * (int) tem.damage());
         }
 
         bossLogger.info("ZombieBoss HP nach attacke: " + getHp());
-        if (getHp() <= 0) {
+        if (getHp().getCurrentHealthpoints() <= 0) {
             bossLogger.info("Der ZombieBoss wurde besiegt!");
             heroXP += getXp();
             bossLogger.info("Hero XP sind jetzt: " + heroXP);

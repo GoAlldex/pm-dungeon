@@ -21,6 +21,7 @@ import ecs.entities.boss.Boss;
 import ecs.entities.boss.OrcBoss;
 import ecs.entities.boss.ZombieBoss;
 import ecs.items.ItemDataGenerator;
+import ecs.items.WorldItemBuilder;
 import ecs.systems.*;
 import graphic.DungeonCamera;
 import graphic.Painter;
@@ -302,6 +303,16 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         bosses.add(zombieBoss);
         bosses.add(biterBoss);
         bosses.add(orcBoss);
+    }
+
+    private PositionComponent getPositionComponent(Entity entity) {
+        PositionComponent position =
+            (PositionComponent)
+                entity.getComponent(PositionComponent.class)
+                    .orElseThrow(
+                        () -> new MissingComponentException("PositionComponent"));
+        addEntity(entity);
+        return position;
     }
 
     public static Optional<Entity> getTraps() {

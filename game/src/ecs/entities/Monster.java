@@ -94,6 +94,10 @@ public abstract class Monster extends Entity {
         return this.hp;
     }
 
+    public void setHp(int hp) {
+        this.hp.setMaximalHealthpoints(hp);
+    }
+
     /**
      <b><span style="color: rgba(3,71,134,1);">Monster XP Menge</span></b><br>
      Rückgabe der Monster XP

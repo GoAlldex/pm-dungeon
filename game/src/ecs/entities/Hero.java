@@ -41,10 +41,10 @@ public class Hero extends Entity {
     private final int arrowCoolDown = 1;
     private final int boomerangCoolDown = 2;
 
-    private final String pathToIdleLeft = "knight/idleLeft";
-    private final String pathToIdleRight = "knight/idleRight";
-    private final String pathToRunLeft = "knight/runLeft";
-    private final String pathToRunRight = "knight/runRight";
+    private String pathToIdleLeft = "knight/idleLeft";
+    private String pathToIdleRight = "knight/idleRight";
+    private String pathToRunLeft = "knight/runLeft";
+    private String pathToRunRight = "knight/runRight";
 
     private Skill skill5 = new Skill(
         new ArrowSkill(SkillTools::getCursorPositionAsPoint), arrowCoolDown, 3);
@@ -486,5 +486,21 @@ public class Hero extends Entity {
 
     public String getPathToRunRight() {
         return pathToRunRight;
+    }
+
+    public void setPathToIdleLeft(String left) {
+        this.pathToIdleLeft = left;
+    }
+
+    public void setPathToIdleRight(String right) {
+        this.pathToIdleRight = right;
+    }
+
+    public void setPathToRunLeft(String runLeft) {
+        this.pathToRunLeft = runLeft;
+    }
+
+    public void setPathToRunRight(String runRight) {
+        this.pathToRunRight = runRight;
     }
 }
