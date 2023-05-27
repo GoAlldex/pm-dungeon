@@ -22,7 +22,7 @@ import java.util.Set;
  */
 public class Hero extends Entity {
 
-    private final int fireballCoolDown = 5;
+    private final int fireballCoolDown = 4;
     private final int arrowCoolDown = 1;
     private final int boomerangCoolDown = 2;
     private final float xSpeed = 0.3f;
