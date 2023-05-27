@@ -2,11 +2,13 @@ package ecs.components.xp;
 
 import ecs.components.Component;
 import ecs.entities.Entity;
+import ecs.entities.Hero;
 
 public class XPComponent extends Component {
 
     private static final double LEVEL_1_XP = 100;
     private static final double FORMULA_SLOPE = 0.5;
+    private long maxXP = 100;
     private long currentLevel;
     private long currentXP;
     private long lootXP = -1;
@@ -93,6 +95,20 @@ public class XPComponent extends Component {
         if (this.callbackLevelUp != null) this.callbackLevelUp.onLevelUp(level);
     }
 
+    /** Level up hero */
+    public void levelUp() {
+        Hero hero = (Hero) entity;
+        hero.lvlUP();
+    }
+
+    /**
+     * @param xp Loot xp for Hero
+     */
+    public void setXP(long xp) {
+        Hero hero = (Hero) entity;
+        hero.setLootXP(xp);
+    }
+
     /**
      * Get the amount of xp that will be dropped when the entity dies. If no value is set, the xp
      * will be set to half of the current xp
@@ -121,6 +137,19 @@ public class XPComponent extends Component {
      */
     public long getXPToNextLevel() {
         // level 0 in Formula is level 1 in game.
-        return Math.round(FORMULA_SLOPE * Math.pow(currentLevel, 2) + LEVEL_1_XP) - currentXP;
+        return Math.round(FORMULA_SLOPE * Math.pow(currentLevel, 2) + maxXP) - currentXP;
+    }
+
+    /**
+     * @return get max xp for currentLevel
+     */
+    public long getMaxXP() {
+        return maxXP;
+    }
+
+    /** Calculate maxXp for next level (20%) */
+    public void getMaxXPToNextLevel() {
+        this.currentXP = this.currentXP - this.maxXP;
+        this.maxXP += ((maxXP * 20) / 100);
     }
 }

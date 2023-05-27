@@ -3,9 +3,8 @@ package ecs.inventory;
 import ecs.components.*;
 import ecs.entities.Entity;
 import graphic.Animation;
-import tools.Point;
-
 import java.util.List;
+import tools.Point;
 
 public class WorldInventoryBuilder {
 
@@ -19,10 +18,10 @@ public class WorldInventoryBuilder {
     public static Entity buildWorldInventory(InventoryComponent inv, Point point) {
         Entity inventory = new Entity();
         new PositionComponent(inventory, point);
-        for(int i = 0; i < inv.filledSlots(); i++) {
+        for (int i = 0; i < inv.filledSlots(); i++) {
             invTex.add(inv.getItem(i).getInventoryTexture().getNextAnimationTexturePath());
         }
-        for(int i = 0; i < inv.emptySlots(); i++) {
+        for (int i = 0; i < inv.emptySlots(); i++) {
             invTex.add(inv.getTexture());
         }
         new AnimationComponent(inventory, new Animation(invTex, 1));

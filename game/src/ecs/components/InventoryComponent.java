@@ -1,17 +1,11 @@
 package ecs.components;
 
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import ecs.entities.Entity;
 import ecs.items.ItemData;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
-
-import graphic.Animation;
 import logging.CustomLogLevel;
-import tools.Point;
 
 /** Allows an Entity to carry Items */
 public class InventoryComponent extends Component {
@@ -105,8 +99,8 @@ public class InventoryComponent extends Component {
         int s = 0;
         System.out.println("Inventar");
         System.out.println("_______________________________");
-        for(ItemData i : getItems()) {
-            System.out.println("Item Slot "+s+": "+i.getItemName());
+        for (ItemData i : getItems()) {
+            System.out.println("Item Slot " + s + ": " + i.getItemName());
             s++;
         }
         System.out.println("_______________________________");
@@ -115,5 +109,4 @@ public class InventoryComponent extends Component {
     public String getTexture() {
         return this.inventoryTex;
     }
-
 }

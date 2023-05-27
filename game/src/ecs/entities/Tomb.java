@@ -4,23 +4,21 @@ import dslToGame.AnimationBuilder;
 import ecs.components.AnimationComponent;
 import ecs.components.HitboxComponent;
 import ecs.components.PositionComponent;
-import ecs.components.VelocityComponent;
 import ecs.items.ItemData;
 import ecs.items.ItemDataGenerator;
 import ecs.items.WorldItemBuilder;
 import graphic.Animation;
-
-import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
 
 /**
- <b><span style="color: rgba(3,71,134,1);">Unsere Grabstein-Klasse.</span></b><br>
- Hier werden die wichtigesten bestandteile unseres Grabsteins initialisiert.<br><br>
-
- @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
- @version cycle_2
- @since 08.05.2023
+ * <b><span style="color: rgba(3,71,134,1);">Unsere Grabstein-Klasse.</span></b><br>
+ * Hier werden die wichtigesten bestandteile unseres Grabsteins initialisiert.<br>
+ * <br>
+ *
+ * @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+ * @version cycle_2
+ * @since 08.05.2023
  */
 public class Tomb extends Entity {
 
@@ -31,13 +29,13 @@ public class Tomb extends Entity {
     private boolean isRewarded = false;
 
     /**
-     <b><span style="color: rgba(3,71,134,1);">Konstruktor</span></b><br>
-     Initialisiert ein neuen Grabstein.
-     @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
-     @version cycle_2
-     @since 08.05.2023
+     * <b><span style="color: rgba(3,71,134,1);">Konstruktor</span></b><br>
+     * Initialisiert ein neuen Grabstein.
+     *
+     * @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+     * @version cycle_2
+     * @since 08.05.2023
      */
-
     public Tomb() {
         this.position = new PositionComponent(this);
         setupAnimationComponent();
@@ -59,11 +57,11 @@ public class Tomb extends Entity {
     @Override
     public void update(Set<Entity> entities, int level) {
         this.ghost.update();
-        if(this.rewardOrPunishment && !this.isRewarded) {
+        if (this.rewardOrPunishment && !this.isRewarded) {
             this.rewardOrPunishment = false;
             this.isRewarded = true;
             int rndRewardOrPunishment = new Random().nextInt(2);
-            if(rndRewardOrPunishment == 0) {
+            if (rndRewardOrPunishment == 0) {
                 System.out.println("ITEM");
                 ItemDataGenerator itm = new ItemDataGenerator();
                 int rnd = new Random().nextInt(itm.getAllItems().size());
@@ -79,8 +77,7 @@ public class Tomb extends Entity {
     }
 
     private void setupCollision() {
-        new HitboxComponent(this,
-            (you, other, direction) -> setGhostPosition());
+        new HitboxComponent(this, (you, other, direction) -> setGhostPosition());
     }
 
     private void setGhostPosition() {
@@ -95,5 +92,4 @@ public class Tomb extends Entity {
     public void setGhost(Ghost ghost) {
         this.ghost = ghost;
     }
-
 }
