@@ -222,7 +222,7 @@ public class TransformSkill implements ISkillFunction {
                            auf.
                         */
                         if (hero.getHp().getCurrentHealthpoints() <= 0) {
-                            hero.gameOver();
+                            //hero.gameOver();
                         }
                     }
                 }

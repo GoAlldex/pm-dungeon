@@ -47,7 +47,7 @@ public class Skill {
                                             hero.getHp().getCurrentHealthpoints() - manaPoint);
                             System.out.println("HeroHP: " + hero.getHp().getCurrentHealthpoints());
                             if (hero.getHp().getCurrentHealthpoints() <= 0) {
-                                hero.gameOver();
+                                //hero.gameOver();
                             }
                         }
                     }
@@ -67,7 +67,7 @@ public class Skill {
                                         hero.getHp().getCurrentHealthpoints() - manaPoint);
                         System.out.println("HeroHP: " + hero.getHp().getCurrentHealthpoints());
                         if (hero.getHp().getCurrentHealthpoints() <= 0) {
-                            hero.gameOver();
+                            //hero.gameOver();
                         }
                     }
                 }
