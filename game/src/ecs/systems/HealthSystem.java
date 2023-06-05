@@ -95,10 +95,10 @@ public class HealthSystem extends ECS_System {
         // Entity appears to be dead, so let's clean up the mess
         hsd.hc.triggerOnDeath();
         //hsd.ac.setCurrentAnimation(hsd.hc.getDieAnimation());
-        if(hsd.e instanceof Hero || hsd.e instanceof Monster) {
+        /*if(hsd.e instanceof Hero || hsd.e instanceof Monster) {
             Game.addEntity(new DeadAnimation(hsd.hc.getEntity()));
         }
-        Game.removeEntity(hsd.hc.getEntity());
+        //Game.removeEntity(hsd.hc.getEntity());*/
 
         // Add XP
         hsd.e

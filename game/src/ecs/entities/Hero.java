@@ -66,11 +66,12 @@ public class Hero extends Entity {
     private Animation hitAnimation = AnimationBuilder.buildAnimation("knight/hit");
     private Animation dieAnimation = AnimationBuilder.buildAnimation("knight/death");
     private AnimationComponent heroAnimation;
-    private Set<Monster> fightHandler  = new HashSet<>();
+    private Set<Monster> fightHandler = new HashSet<>();
     private int hitSpeed;
     private int hitPause = 0;
     private int frameTime;
     private int melee;
+    private HitboxComponent hitBox;
     private static final Logger log = Logger.getLogger(Hero.class.getName());
 
     /**
@@ -106,7 +107,7 @@ public class Hero extends Entity {
         this.position = new PositionComponent(this);
         mc = new ManaComponent(this, 15, Constants.FRAME_RATE);
         onDeath();
-        this.hp = new HealthComponent(this, 200, this.death, this.hitAnimation, this.dieAnimation);
+        this.hp = new HealthComponent(this, 10, this.death, this.hitAnimation, this.dieAnimation);
         this.melee = 100;
         this.hitSpeed = 1;
         setupVelocityComponent();
@@ -170,7 +171,7 @@ public class Hero extends Entity {
 
     /** CollisionBox */
     private void setupHitboxComponent() {
-        new HitboxComponent(
+        this.hitBox = new HitboxComponent(
                 this,
                 (you, other, direction) -> {
                     if (you != other) {
@@ -268,7 +269,7 @@ public class Hero extends Entity {
             ySpeed = 0.3f;
         }
         // Prüfe ob GameOver ist
-        gameOver();
+        //gameOver();
     }
 
     private void fightMonster() {
@@ -283,11 +284,6 @@ public class Hero extends Entity {
                         if(Game.getEntities().contains(m)) {
                             m.getHp().receiveHit(new Damage(this.melee, PHYSICAL, this));
                             log.info("Hero hits " + m.getClass().getSimpleName() + ": " + this.melee + " Hp");
-                            if (m.getHp().getCurrentHealthpoints() <= 0) {
-                                fightHandler.remove(m);
-                            }
-                        } else {
-                            fightHandler.remove(m);
                         }
                     }
                 } else {
@@ -303,13 +299,31 @@ public class Hero extends Entity {
         return this.inventory;
     }
 
+    /**
+     <b><span style="color: rgba(3,71,134,1);">Wenn der Held stirbt</span></b><br>
+     - Leere das Kampfsystem
+     - Setze sterbe Animation
+     - Entferne den Helden
+     @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+     @version cycle_4
+     @since 04.06.2023
+     */
     public void onDeath() {
         this.death = entity -> {
+            this.hitBox = null;
+            this.fightHandler = new HashSet<>();
+            Game.addEntity(new DeadAnimation(this));
             log.info("Hero died.");
+            Game.removeEntity(this);
+            Game.gameOver();
         };
     }
 
-    public void gameOver() {
+    public Set<Monster> getFightHandler() {
+        return this.fightHandler;
+    }
+
+    /*public void gameOver() {
         if (hp != null) {
             if (hp.getCurrentHealthpoints() <= 0) {
                 pc = null;
@@ -321,20 +335,12 @@ public class Hero extends Entity {
                 Game.gameOver();
             }
         }
-    }
+    }*/
 
     public boolean isGameOver() {
         return gameOver;
     }
 
-    /**
-     <b><span style="color: rgba(3,71,134,1);">Position</span></b><br>
-     Position des Helden im Dungeon Level.
-     @return PositionComponent gibt die Position des Helden zurück
-     @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
-     @version cycle_2
-     @since 08.05.2023
-     */
     public PositionComponent getPosition() {
         return position;
     }
@@ -357,14 +363,6 @@ public class Hero extends Entity {
 
     public XPComponent getXP() {
         return this.xp;
-    }
-
-    public AnimationComponent getHeroAnimation() {
-        return heroAnimation;
-    }
-
-    public void setHeroAnimation(AnimationComponent heroAnimation) {
-        this.heroAnimation = heroAnimation;
     }
 
     /**
@@ -405,7 +403,7 @@ public class Hero extends Entity {
         if (h <= 0) {
             System.out.println("GameOver");
             this.hp.setCurrentHealthpoints(0);
-            gameOver();
+            //gameOver();
         } else {
             int reg = (hp.getMaximalHealthpoints() * 20) / 100;
             System.out.println(
