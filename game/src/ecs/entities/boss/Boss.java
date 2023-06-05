@@ -5,7 +5,6 @@ import ecs.components.AnimationComponent;
 import ecs.components.PositionComponent;
 import ecs.components.VelocityComponent;
 import ecs.components.skill.Skill;
-import ecs.entities.Entity;
 import ecs.entities.Monster;
 import graphic.Animation;
 import java.util.LinkedList;
@@ -47,8 +46,6 @@ public abstract class Boss extends Monster {
 
     // Variablen
     protected PositionComponent bossPosition; // Boss Position
-    protected PositionComponent heroPosition; // Held Position
-    protected Entity hero;
     private static LinkedList<Skill> skills = new LinkedList<>(); // weitere Skills
     protected Skill skill1, skill2; // default
     private int level = 0; // Held level
@@ -107,24 +104,6 @@ public abstract class Boss extends Monster {
      */
     public PositionComponent getBossPosition() {
         return new PositionComponent(this);
-    }
-
-    /**
-     * Boss position
-     *
-     * @param entity Boss entity
-     * @return new PositionComponent für Boss
-     */
-    protected PositionComponent heroPosition(PositionComponent entity) {
-        this.heroPosition = entity;
-        return new PositionComponent(heroPosition.getEntity());
-    }
-
-    /**
-     * @return liefert aktuelle Boss Position
-     */
-    public PositionComponent getHeroPosition() {
-        return heroPosition;
     }
 
     /**
