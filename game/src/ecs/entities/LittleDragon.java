@@ -98,7 +98,9 @@ public class LittleDragon extends Monster {
 
     @Override
     public void update() {
-        fightHero();
+        if(!Game.getPause()) {
+            fightHero();
+        }
     }
 
     private void fightHero() {

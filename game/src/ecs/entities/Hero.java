@@ -226,8 +226,10 @@ public class Hero extends Entity {
      */
     @Override
     public void update() {
-        fightMonster();
-        skill1_4();
+        if(!Game.getPause()) {
+            fightMonster();
+            skill1_4();
+        }
     }
 
     private void skill1_4() {

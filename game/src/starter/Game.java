@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import configuration.Configuration;
 import configuration.KeyboardConfig;
 import controller.AbstractController;
+import controller.ScreenController;
 import controller.SystemController;
 import creature.trap.*;
 import ecs.components.MissingComponentException;
@@ -53,7 +54,7 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
     protected SpriteBatch batch;
 
     /** Contains all Controller of the Dungeon */
-    protected List<AbstractController<?>> controller;
+    public static List<AbstractController<?>> controller;
 
     public static DungeonCamera camera;
     /** Draws objects */
@@ -140,6 +141,10 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         createSystems();
     }
 
+    public static boolean getPause() {
+        return paused;
+    }
+
     /** Called at the beginning of each frame. Before the controllers call <code>update</code>. */
     protected void frame() {
         if(Gdx.input.isKeyJustPressed(Input.Keys.B)) {
@@ -153,7 +158,7 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         manageEntitiesSets();
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) togglePause();
         tomb.update(levelCounter);
-        for(Monster m : monster) {
+        for (Monster m : monster) {
             m.update();
         }
         hero.update();
@@ -229,7 +234,7 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         levelCounter++;
         entities.clear();
         createNPC();
-        createMonster();
+        //createMonster();
         createWorldItems();
         int randomNumberTraps = new Random().nextInt(2);
         for (int i = 0; i < randomNumberTraps; i++) {
