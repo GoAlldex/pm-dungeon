@@ -7,15 +7,17 @@ import ecs.components.PositionComponent;
 import ecs.components.ai.AIComponent;
 import ecs.components.ai.AITools;
 import ecs.components.skill.*;
+import ecs.components.xp.XPComponent;
+import ecs.damage.Damage;
+import ecs.damage.DamageType;
 import ecs.entities.Entity;
 import ecs.entities.Hero;
 import ecs.entities.Zombie;
-import ecs.items.ItemData;
 import ecs.items.ItemDataGenerator;
+import ecs.items.WorldItemBuilder;
+import graphic.Animation;
 import java.util.*;
 import java.util.logging.Logger;
-
-import graphic.Animation;
 import starter.Game;
 
 /**
@@ -35,21 +37,23 @@ public class ZombieBoss extends Boss {
     private SlimeSkill slimeSkill;
     private static boolean init = false;
     private ArrayList<Zombie> zombies = new ArrayList<>();
-    private Animation dieAnimation = AnimationBuilder.buildAnimation("monster/type2/boss/death");
+    private static final Animation DIE_ANIMATION =
+            AnimationBuilder.buildAnimation("monster/type2/boss/death");
 
     /**
      * Konstruktor
      *
      * @param level aktuelles Level
-     * @param heroEntity Hero entity
      */
-    public ZombieBoss(int level, Entity heroEntity) {
+    public ZombieBoss(int level) {
         super(level);
         this.bossLogger = Logger.getLogger(getClass().getName());
+        setItem();
+        onDeath();
         setup();
-        bossPosition(getPosition());
-        heroPosition(new PositionComponent(heroEntity));
-        this.hero = heroEntity;
+        if (Game.getHero().isPresent()) {
+            hero = (Hero) Game.getHero().get();
+        }
         this.pathToIdleLeft = pathToTextur + "idleLeft";
         this.pathToIdleRight = pathToTextur + "idleRight";
         this.pathToRunLeft = pathToTextur + "runLeft";
@@ -59,9 +63,6 @@ public class ZombieBoss extends Boss {
         setupSkills();
         setupHitboxComponent();
         setupIIdleAI();
-        this.hp.setCurrentHealthpoints(30);
-        this.hp.setDieAnimation(getEmptyAnimation());
-        this.hp.setGetHitAnimation(getEmptyAnimation());
     }
 
     /** Boss setup */
@@ -71,6 +72,9 @@ public class ZombieBoss extends Boss {
         this.hp.setMaximalHealthpoints(100);
         this.hp.setCurrentHealthpoints(
                 Math.round((45 * getLevel()) * (1.5f + ((float) getLevel() / 10) - 0.1f)));
+        this.hp.setDieAnimation(DIE_ANIMATION);
+        this.hp.setGetHitAnimation(getEmptyAnimation());
+        this.hp.setOnDeath(death);
         staticHPBalken = getHp().getMaximalHealthpoints();
         this.speed[0] = zombieDMG * 0.8f;
         this.speed[1] = zombieDMG * 0.8f;
@@ -105,7 +109,6 @@ public class ZombieBoss extends Boss {
                         });
                 zombieComponent.execute();
                 zombies.add(zombie);
-                hitboxZombie();
             }
             init = true;
         } else {
@@ -146,33 +149,8 @@ public class ZombieBoss extends Boss {
 
     private void hitboxZombie() {
         for (Zombie zombie : zombies) {
-            new HitboxComponent(zombie, (a, b, from) -> setupHitboxZombie(), (a, b, from) -> {});
-        }
-    }
-
-    private void setupHitboxZombie() {
-        if (zombies != null) {
-            for (Zombie zombie : zombies) {
-                HealthComponent hc = new HealthComponent(zombie);
-                hc.setDieAnimation(dieAnimation);
-                bossLogger.info("Zombie hp " + zombie.getHp());
-                new HitboxComponent(
-                        zombie,
-                        (you, other, direction) -> {
-                            if (other != zombie && other == hero) {
-                                zombie.setHp(zombie.getHp().getCurrentHealthpoints() - (int) (getLevel() * 5.5f));
-                                info("skill2");
-                                bossLogger.info("Zombie hp nach attacke: " + zombie.getHp());
-                                if (zombie.getHp().getCurrentHealthpoints() <= 0) {
-                                    bossLogger.info("Zombie wurde besiegt");
-                                    heroXP += zombie.getXp();
-                                    bossLogger.info("Hero XP sind jetzt: " + heroXP);
-                                    Game.removeEntity(zombie);
-                                }
-                            }
-                        },
-                        (you, other, direction) ->
-                                System.out.println("Leave Zombie from Boss klass"));
+            if (zombie.getHp().getCurrentHealthpoints() <= 0) {
+                heroXP = (int) zombie.getXp();
             }
         }
     }
@@ -181,8 +159,9 @@ public class ZombieBoss extends Boss {
         new HitboxComponent(
                 this,
                 (you, other, direction) -> {
-                    if (other == hero) {
+                    if (other instanceof Hero) {
                         onCollision(true);
+                        hero = (Hero) other;
                     }
                 },
                 (you, other, direction) -> onCollision(false));
@@ -232,8 +211,6 @@ public class ZombieBoss extends Boss {
                     hit = 0;
                     bossLogger.info("Skill 2 wurde aktiviert");
                     info("skill2");
-                    hitboxZombie();
-                    Game.removeEntity(slimeSkill.getEntity());
                 }
             } else {
                 if (skill1.isOnCoolDown()) {
@@ -299,50 +276,44 @@ public class ZombieBoss extends Boss {
                 timerStart = System.currentTimeMillis();
             }
         }
+        hitboxZombie();
     }
 
     private void attack() {
-        Hero tem = (Hero) hero;
-        if (tem.getHp() != null) {
-            bossLogger.info("ZombieBoss hat " + tem.damage() + " damage's!");
-            this.hp.setCurrentHealthpoints(getHp().getCurrentHealthpoints() - getLevel() * (int) tem.damage());
-        }
-
-        bossLogger.info("ZombieBoss HP nach attacke: " + getHp());
-        if (getHp().getCurrentHealthpoints() <= 0) {
-            bossLogger.info("Der ZombieBoss wurde besiegt!");
-            heroXP += getXp();
-            bossLogger.info("Hero XP sind jetzt: " + heroXP);
-            bossLogger.info("Hero hat " + heroDMG + " damage's bekommen.");
-            Hero hero1 = (Hero) hero;
-            if (hero1.getHp() != null) {
-                hero1.setHp(heroDMG);
-                hero1.setLootXP(heroXP);
-            }
-
-            // clear
-            remove();
+        if (hero.getHp() != null) {
+            bossLogger.info("ZombieBoss hat " + hero.damage() + " damage's bekommen!");
+            this.hp.receiveHit(
+                    new Damage(
+                            getHp().getCurrentHealthpoints() - getLevel() * (int) hero.damage(),
+                            DamageType.PHYSICAL,
+                            this));
         }
         hitbox();
-    }
-
-    private void remove() {
-        Game.removeEntity(this);
-        Game.removeEntity(slimeSkill.getEntity());
-        if (zombies != null) {
-            for (Zombie z : zombies) {
-                Game.removeEntity(z.getAI().getEntity());
-            }
-        }
-        assert zombies != null;
-        zombies.clear();
     }
 
     public void onDeath() {
         this.death =
                 entity -> {
-                    ItemDataGenerator idg = new ItemDataGenerator();
-                    ItemData id = idg.getItem(idg.getAllItems().size());
+                    dropItem = true;
+                    dropItem();
+                    bossLogger.info("Der ZombieBoss wurde besiegt!");
+                    bossLogger.info("Hero XP sind jetzt: " + heroXP);
+                    bossLogger.info("Hero hat " + heroDMG + " damage's bekommen.");
+                    new XPComponent(hero).setXP(heroXP);
                 };
+    }
+
+    /** Initialisiere ein Random Item, wenn der Boss besiegt wurde. */
+    private void setItem() {
+        ItemDataGenerator dataGenerator = new ItemDataGenerator();
+        int rnd = new Random().nextInt(dataGenerator.getAllItems().size());
+        this.item = dataGenerator.getItem(rnd);
+    }
+
+    private void dropItem() {
+        if (dropItem) {
+            Game.addEntity(WorldItemBuilder.buildWorldItem(item, this.position.getPosition()));
+            dropItem = !dropItem;
+        }
     }
 }

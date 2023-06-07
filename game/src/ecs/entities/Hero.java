@@ -1,5 +1,7 @@
 package ecs.entities;
 
+import static ecs.damage.DamageType.PHYSICAL;
+
 import dslToGame.AnimationBuilder;
 import ecs.components.*;
 import ecs.components.AnimationComponent;
@@ -8,19 +10,14 @@ import ecs.components.VelocityComponent;
 import ecs.components.skill.*;
 import ecs.components.xp.XPComponent;
 import ecs.damage.Damage;
-import ecs.components.xp.XPComponent;
-import ecs.entities.boss.Boss;
 import ecs.entities.boss.Boss;
 import ecs.items.ItemDataGenerator;
 import ecs.systems.MyFormatter;
 import graphic.Animation;
-import tools.Constants;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.*;
-import static ecs.damage.DamageType.PHYSICAL;
-import starter.Game;
 import java.util.logging.Logger;
 import starter.Game;
 import tools.Constants;
@@ -38,6 +35,7 @@ public class Hero extends Entity {
     private MindControlSkill mindControlSkill;
     private float xSpeed = 0.3f;
     private float ySpeed = 0.3f;
+    private long dmg;
     private final int arrowCoolDown = 1;
     private final int boomerangCoolDown = 2;
 
@@ -46,11 +44,12 @@ public class Hero extends Entity {
     private String pathToRunLeft = "knight/runLeft";
     private String pathToRunRight = "knight/runRight";
 
-    private Skill skill5 = new Skill(
-        new ArrowSkill(SkillTools::getCursorPositionAsPoint), arrowCoolDown, 3);
+    private Skill skill5 =
+            new Skill(new ArrowSkill(SkillTools::getCursorPositionAsPoint), arrowCoolDown, 3);
 
-    private Skill skill6 = new Skill(
-        new BoomerangSkill(SkillTools::getCursorPositionAsPoint), boomerangCoolDown, 3);
+    private Skill skill6 =
+            new Skill(
+                    new BoomerangSkill(SkillTools::getCursorPositionAsPoint), boomerangCoolDown, 3);
 
     private Skill firstSkill, secondSkill, thirdSkill, fourthSkill;
     private InventoryComponent inventory;
@@ -75,17 +74,17 @@ public class Hero extends Entity {
     private static final Logger log = Logger.getLogger(Hero.class.getName());
 
     /**
-     <b><span style="color: rgba(3,71,134,1);">Logger für den Helden</span></b><br>
-     Loggen der Helden  Ereignisse in der Datei Hero.txt im Ordner Logs.<br>
-
-     @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
-     @version cycle_3
-     @since 21.05.2023
+     * <b><span style="color: rgba(3,71,134,1);">Logger für den Helden</span></b><br>
+     * Loggen der Helden Ereignisse in der Datei Hero.txt im Ordner Logs.<br>
+     *
+     * @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+     * @version cycle_3
+     * @since 21.05.2023
      */
-    public static void HeroLogs(){
+    public static void HeroLogs() {
         Handler fileHandler = null;
         try {
-            fileHandler = new FileHandler("logs/log_Hero.txt",true);
+            fileHandler = new FileHandler("logs/log_Hero.txt", true);
             fileHandler.setLevel(Level.ALL);
             fileHandler.setFormatter(new MyFormatter("Hero"));
             log.addHandler(fileHandler);
@@ -107,7 +106,7 @@ public class Hero extends Entity {
         this.position = new PositionComponent(this);
         mc = new ManaComponent(this, 15, Constants.FRAME_RATE);
         onDeath();
-        this.hp = new HealthComponent(this, 10, this.death, this.hitAnimation, this.dieAnimation);
+        this.hp = new HealthComponent(this, 200, this.death, this.hitAnimation, this.dieAnimation);
         this.melee = 100;
         this.hitSpeed = 1;
         setupVelocityComponent();
@@ -153,7 +152,6 @@ public class Hero extends Entity {
     private void setupLightningLine() {
         lightningLineSkill = new LightningLineSkill(SkillTools::getCursorPositionAsPoint);
         lightningCoolDown = lightningLineSkill.getBreakTime();
-        heroLogger.info("CoolDown for lightning: " + lightningCoolDown);
         secondSkill =
                 new Skill(lightningLineSkill, lightningCoolDown, lightningLineSkill.getMana());
     }
@@ -165,7 +163,7 @@ public class Hero extends Entity {
     }
 
     private void setupMindControlSkill() {
-        mindControlSkill = new MindControlSkill((int) getLevel());
+        mindControlSkill = new MindControlSkill();
         fourthSkill = new Skill(mindControlSkill, 0, mindControlSkill.getMana());
     }
 
@@ -182,12 +180,12 @@ public class Hero extends Entity {
                             }
                         }
                     }
-                    if(other instanceof Monster) {
+                    if (other instanceof Monster) {
                         fightHandler.add((Monster) other);
                     }
                 },
                 (you, other, direction) -> {
-                    if(other instanceof Monster) {
+                    if (other instanceof Monster) {
                         fightHandler.remove(other);
                     }
                 });
@@ -195,12 +193,11 @@ public class Hero extends Entity {
 
     /** Lade standard Items */
     private void setDefaultItems() {
-        this.inventory = new InventoryComponent(this, 9);
+        this.inventory = new InventoryComponent(this, 2);
         ItemDataGenerator itm = new ItemDataGenerator();
         this.inventory.addItem(itm.getItem(0));
         this.inventory.addItem(itm.getItem(1));
     }
-
 
     /**
      * Welche Skill soll aktiviert werden.
@@ -242,9 +239,6 @@ public class Hero extends Entity {
                 timerForLightningStart = System.currentTimeMillis();
                 heroLogger.info("Skill ist wieder aktiv!");
             }
-            // heroLogger.info("Mana von Hero: " + mc.getCurrentManaPoint());
-            // heroLogger.info("CoolDown: "+lightningCoolDown+" | Timer: " + (timerForLightningEnd -
-            // timerForLightningStart) / (60*60) + "s");
         }
         // Rufe transformSkill update auf
         // Verstärke Player dmg und erhöhe die Player
@@ -270,12 +264,10 @@ public class Hero extends Entity {
             xSpeed = 0.3f;
             ySpeed = 0.3f;
         }
-        // Prüfe ob GameOver ist
-        //gameOver();
     }
 
     private void fightMonster() {
-        if(this.getHp().getCurrentHealthpoints() <= 0) {
+        if (this.getHp().getCurrentHealthpoints() <= 0) {
             this.fightHandler.clear();
         } else {
             if (!this.fightHandler.isEmpty()) {
@@ -283,7 +275,7 @@ public class Hero extends Entity {
                 if (this.hitPause >= this.frameTime) {
                     this.hitPause = 0;
                     for (Monster m : this.fightHandler) {
-                        if(Game.getEntities().contains(m)) {
+                        if (Game.getEntities().contains(m)) {
                             m.getHp().receiveHit(new Damage(this.melee, PHYSICAL, this));
                             log.info("Hero hits " + m.getClass().getSimpleName() + ": " + this.melee + " Hp");
                         }
@@ -294,7 +286,6 @@ public class Hero extends Entity {
             }
         }
     }
-
 
     @Override
     public InventoryComponent getInventory() {
@@ -317,6 +308,7 @@ public class Hero extends Entity {
             Game.addEntity(new DeadAnimation(this));
             log.info("Hero died.");
             Game.removeEntity(this);
+            gameOver = true;
             Game.gameOver();
         };
     }
@@ -325,24 +317,28 @@ public class Hero extends Entity {
         return this.fightHandler;
     }
 
-    /*public void gameOver() {
-        if (hp != null) {
-            if (hp.getCurrentHealthpoints() <= 0) {
-                pc = null;
-                gameOver = true;
-                mc = null;
-                hp = null;
-                dmg = 0;
-                Game.removeEntity(this);
-                Game.gameOver();
-            }
-        }
-    }*/
+    /** Setze die Hero Attributen auf 0 */
+    public void clear() {
+        pc = null;
+        mc = null;
+        hp = null;
+        melee = 0;
+        dmg = 0;
+    }
 
     public boolean isGameOver() {
         return gameOver;
     }
 
+    /**
+     * <b><span style="color: rgba(3,71,134,1);">Position</span></b><br>
+     * Position des Helden im Dungeon Level.
+     *
+     * @return PositionComponent gibt die Position des Helden zurück
+     * @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+     * @version cycle_2
+     * @since 08.05.2023
+     */
     public PositionComponent getPosition() {
         return position;
     }
@@ -352,11 +348,11 @@ public class Hero extends Entity {
     }
 
     public void setMaxHp(int level) {
-        this.hp.setMaximalHealthpoints(this.hp.getMaximalHealthpoints()*(level*1));
+        this.hp.setMaximalHealthpoints(this.hp.getMaximalHealthpoints() * (level * 1));
     }
 
     public void setMeleeDmg(int level) {
-        this.melee = this.melee*(level*1);
+        this.melee = this.melee * (level * 1);
     }
 
     public int getDmg() {
@@ -396,22 +392,20 @@ public class Hero extends Entity {
 
     /**
      * Die Hero HP werden nach der Kampf gesetzt. Außerdem wird es überprüft, ob die hp <= 0 sind
-     * oder nicht falls ja, wird die methode gameOver aufgerufen.
+     * oder nicht.
      *
      * @param heroDMG HealthComponent object
      */
     public void setHp(int heroDMG) {
         int h = this.hp.getMaximalHealthpoints() - heroDMG;
         if (h <= 0) {
-            System.out.println("GameOver");
+            this.hp.setMaximalHealthpoints(0);
             this.hp.setCurrentHealthpoints(0);
-            //gameOver();
         } else {
             int reg = (hp.getMaximalHealthpoints() * 20) / 100;
-            System.out.println(
-                    "Hero hat nach dem Kampf: " + this.hp.getCurrentHealthpoints() + "hp");
+            heroLogger.info("Hero hat nach dem Kampf: " + this.hp.getCurrentHealthpoints() + "hp");
             this.hp.setCurrentHealthpoints(this.hp.getCurrentHealthpoints() + reg);
-            System.out.println("Es wurden " + reg + "hp regeneriert!");
+            heroLogger.info("Es wurden " + reg + "hp regeneriert!");
         }
     }
 
@@ -423,8 +417,11 @@ public class Hero extends Entity {
         return mc;
     }
 
-    private long dmg;
-
+    /**
+     * Prüft und rechnet wie viel der Hero an Damages gemacht hat.
+     *
+     * @return wie viel an Damage hat der Hero gemacht.
+     */
     public long damage() {
         dmg += Math.round(0.25 * getLevel());
         int dmgFire = fireballSkill.getDamage().damageAmount();
@@ -461,15 +458,14 @@ public class Hero extends Entity {
 
     /** Konsolenausgabe (Taste: I) */
     public void info() {
-        System.out.println(
+        heroLogger.info(
                 "HP: " + hp.getCurrentHealthpoints() + " von " + hp.getMaximalHealthpoints());
-        if (xp.getCurrentXP() <= 0) {
-            xp.setCurrentXP(0);
-        }
-        System.out.println("XP: " + xp.getCurrentXP() + " von " + xp.getMaxXP());
-        System.out.println("CurrentLevel: " + xp.getCurrentLevel());
+        if (xp.getCurrentXP() <= 0) xp.setCurrentXP(0);
+        heroLogger.info("XP: " + xp.getCurrentXP() + " von " + xp.getMaxXP());
         if (mc.getCurrentManaPoint() <= 0) mc.setCurrentManaPoint(0);
-        System.out.println("Mana: " + mc.getCurrentManaPoint() + " von " + mc.getMaxManaPoint());
+        heroLogger.info("Mana: " + mc.getCurrentManaPoint() + " von " + mc.getMaxManaPoint());
+        heroLogger.info("Melee: " + melee);
+        heroLogger.info("CurrentLevel: " + xp.getCurrentLevel());
     }
 
     public String getPathToIdleLeft() {

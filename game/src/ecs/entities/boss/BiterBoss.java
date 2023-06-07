@@ -1,18 +1,21 @@
 package ecs.entities.boss;
 
+import dslToGame.AnimationBuilder;
 import ecs.components.HealthComponent;
 import ecs.components.HitboxComponent;
-import ecs.components.MissingComponentException;
 import ecs.components.PositionComponent;
 import ecs.components.ai.AIComponent;
 import ecs.components.ai.idle.PatrouilleWalk;
 import ecs.components.skill.HealSkill;
 import ecs.components.skill.Skill;
 import ecs.components.xp.XPComponent;
+import ecs.damage.Damage;
+import ecs.damage.DamageType;
 import ecs.entities.Entity;
 import ecs.entities.Hero;
 import ecs.items.ItemDataGenerator;
 import ecs.items.WorldItemBuilder;
+import graphic.Animation;
 import java.util.*;
 import java.util.logging.Logger;
 import starter.Game;
@@ -27,11 +30,15 @@ import starter.Game;
 public class BiterBoss extends Boss {
 
     // Attributen
-    private final String pathToTextur = "monster/type1/boss/";
+    private static final String PATH_TO_TEXTUR = "monster/type1/boss/";
+    private static final Animation deathAnimation =
+            AnimationBuilder.buildAnimation(PATH_TO_TEXTUR + "death");
+    private static final Animation hitAnimation =
+            AnimationBuilder.buildAnimation(PATH_TO_TEXTUR + "hit");
     private int heroXP = 0;
     private int heroDMG = 0;
     private float multi = 0.3f;
-    private boolean isCollision = false;
+    private long timerStart = System.currentTimeMillis();
     private HealSkill healSkill; // Skill 1
 
     /**
@@ -39,44 +46,40 @@ public class BiterBoss extends Boss {
      *
      * @param level Held aktuelle level
      */
-    public BiterBoss(int level, Entity heroEntity) {
+    public BiterBoss(int level) {
         super(level);
         this.bossLogger = Logger.getLogger(getClass().getName());
-        setup(heroEntity);
+        setup();
         setupVelocityComponent();
         setupAnimationComponent();
         setupHitboxComponent();
         setupSkills();
         setupIIdleAI();
         setItem();
-        this.dmg = Math.round(dmg * (multi + ((float) getLevel() / 10) - 0.1f));
+        this.dmg = Math.round(1 * (multi + ((float) getLevel() / 10) - 0.1f) + 1);
     }
 
-    /**
-     * Initialisiere alle erforderlichen Variablen für BiterBoss
-     *
-     * @param heroEntity Hero entity
-     */
-    private void setup(Entity heroEntity) {
+    /** Initialisiere alle erforderlichen Variablen für BiterBoss */
+    private void setup() {
         this.position = new PositionComponent(this);
         bossPosition(getPosition());
-        heroPosition(new PositionComponent(heroEntity));
-        this.hero = heroEntity;
-        this.pathToIdleLeft = pathToTextur + "idleLeft";
-        this.pathToIdleRight = pathToTextur + "idleRight";
-        this.pathToRunLeft = pathToTextur + "runLeft";
-        this.pathToRunRight = pathToTextur + "runRight";
+        onDeath();
+        this.pathToIdleLeft = PATH_TO_TEXTUR + "idleLeft";
+        this.pathToIdleRight = PATH_TO_TEXTUR + "idleRight";
+        this.pathToRunLeft = PATH_TO_TEXTUR + "runLeft";
+        this.pathToRunRight = PATH_TO_TEXTUR + "runRight";
         this.hp = new HealthComponent(this);
         this.hp.setMaximalHealthpoints(
                 Math.round((35 * getLevel()) * (0.5f + ((float) getLevel() / 10) - 0.1f)));
         this.hp.setCurrentHealthpoints(
                 Math.round((35 * getLevel()) * (0.5f + ((float) getLevel() / 10) - 0.1f)));
-        this.hp.setDieAnimation(getEmptyAnimation());
+        this.hp.setDieAnimation(deathAnimation);
         this.hp.setGetHitAnimation(getEmptyAnimation());
+        this.hp.setOnDeath(death);
         this.speed[0] = 0.22f;
         this.speed[1] = 0.22f;
         this.xp = Math.round((35 * getLevel()) * (1 + ((float) getLevel() / 10) - 1.0f));
-        bossLogger.info("BiterBoss wurde initialisiert!");
+        bossLogger.info(getClass().getSimpleName() + " wurde initialisiert!");
     }
 
     /** Initialisiere ein Random Item, wenn der Boss besiegt wurde. */
@@ -90,21 +93,31 @@ public class BiterBoss extends Boss {
     private void setupHitboxComponent() {
         new HitboxComponent(
                 this,
-                (you, other, direction) -> onCollision(true),
-                (you, other, direction) -> onCollision(false));
+                (you, other, direction) -> {
+                    if (other instanceof Hero) {
+                        onCollision(Game.getHero().isPresent(), other);
+                    }
+                },
+                (you, other, direction) -> onCollision(false, other));
     }
 
     /**
      * @param collision true: wenn die collision betreten wurde, ansonsten false findet kein
      *     collision statt.
      */
-    private void onCollision(boolean collision) {
+    private void onCollision(boolean collision, Entity other) {
         if (collision) {
             bossLogger.info("biterBossCollisionEnter");
+            if (other instanceof Hero) {
+                if (this.hero == null) {
+                    this.hero = (Hero) other;
+                }
+                fight = true;
+            }
         } else {
             bossLogger.info("biterBossCollisionLeave");
+            fight = false;
         }
-        this.isCollision = collision;
     }
 
     // Override method's
@@ -161,24 +174,29 @@ public class BiterBoss extends Boss {
         } else {
             bossLogger.info("Damage: attacke....");
             heroDMG += dmg;
+            bossLogger.info("Damage: " + heroDMG);
         }
+        this.hero.getHp().receiveHit(new Damage(heroDMG, DamageType.PHYSICAL, this));
     }
-
-    long timerStart = System.currentTimeMillis();
 
     @Override
     public void update(Set<Entity> entities, int level) {
+        fightHero();
+    }
+
+    private void fightHero() {
         long timerEnd = System.currentTimeMillis();
-        if (isCollision) {
+        if (fight) {
             long time = (timerEnd - timerStart) / (60 * 60);
             if (time == new Random().nextInt(3) + 1) {
-                attacke();
+                if (Game.getHero().isPresent()) {
+                    attacke();
+                }
                 timerStart = System.currentTimeMillis();
             }
             // Hero attacke
             if (time == new Random().nextInt(3) + 1) {
-                Hero hero1 = (Hero) hero;
-                long heroDMG = hero1.damage();
+                long heroDMG = hero.damage();
                 bossLogger.info("Boss hp: " + hp.getCurrentHealthpoints());
                 hp.setCurrentHealthpoints(hp.getCurrentHealthpoints() - (int) heroDMG);
                 bossLogger.info(
@@ -191,26 +209,29 @@ public class BiterBoss extends Boss {
                 timerStart = System.currentTimeMillis();
             }
         }
-        if (!isCollision) {
+        if (!fight) {
             timerStart = System.currentTimeMillis();
         }
+    }
 
-        if (hp.getCurrentHealthpoints() <= 0) {
-            heroXP = (int) xp;
-            bossLogger.info("BiterBoss wurde besiegt!\n" + "Hero hat " + heroXP + "xp bekommen!!!");
-            new XPComponent(hero).setXP(heroXP);
-            Hero hero1 = (Hero) hero;
-            hero1.setHp(heroDMG);
-            hero1.getMc().generateManaPointToNextLevel();
-            PositionComponent pc =
-                    (PositionComponent)
-                            getComponent(PositionComponent.class)
-                                    .orElseThrow(
-                                            () ->
-                                                    new MissingComponentException(
-                                                            "PositionComponent"));
-            entities.add(WorldItemBuilder.buildWorldItem(item, pc.getPosition()));
-            Game.removeEntity(this);
+    public void onDeath() {
+        this.death =
+                entity -> {
+                    log.info(getClass().getSimpleName() + " died.");
+                    heroXP = (int) xp;
+                    bossLogger.info(
+                            "BiterBoss wurde besiegt!\n" + "Hero hat " + heroXP + "xp bekommen!!!");
+                    new XPComponent(hero).setXP(heroXP);
+                    this.hero.getMc().generateManaPointToNextLevel();
+                    dropItem = true;
+                    dropItem();
+                };
+    }
+
+    private void dropItem() {
+        if (dropItem) {
+            Game.addEntity(WorldItemBuilder.buildWorldItem(item, this.position.getPosition()));
+            dropItem = !dropItem;
         }
     }
 }

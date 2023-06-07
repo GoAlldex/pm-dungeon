@@ -1,5 +1,7 @@
 package ecs.components.skill;
 
+import ecs.damage.Damage;
+import ecs.damage.DamageType;
 import ecs.entities.Entity;
 import ecs.entities.Hero;
 import java.util.Random;
@@ -118,10 +120,6 @@ public class TransformSkill implements ISkillFunction {
                 isActive = !isActive;
                 randomTimer = new Random().nextInt(max - min + 1) + min; // randomTime
             }
-            if (timer != 0 && !isActive) {
-                // transformLogger.info("Transformation endet in " + timer + "s : " + randomTimer +
-                // "s");
-            }
         }
     }
 
@@ -156,8 +154,11 @@ public class TransformSkill implements ISkillFunction {
                     }
                     if (mana <= 0 && hero.getHp().getCurrentHealthpoints() >= 0) {
                         hero.getHp()
-                                .setCurrentHealthpoints(
-                                        hero.getHp().getCurrentHealthpoints() - (int) mana);
+                                .receiveHit(
+                                        new Damage(
+                                                hero.getHp().getCurrentHealthpoints() - (int) mana,
+                                                DamageType.PHYSICAL,
+                                                null));
                         transformLogger.info(
                                 "Mana sind alle, ziehe von Lebenspunkte ab ("
                                         + mana
@@ -181,8 +182,12 @@ public class TransformSkill implements ISkillFunction {
 
                             if (heroMana <= 0) {
                                 hero.getHp()
-                                        .setCurrentHealthpoints(
-                                                hero.getHp().getCurrentHealthpoints() + heroMana);
+                                        .receiveHit(
+                                                new Damage(
+                                                        hero.getHp().getCurrentHealthpoints()
+                                                                + heroMana,
+                                                        DamageType.PHYSICAL,
+                                                        null));
                                 System.out.println(
                                         "Hero Mana ist unter 0 und "
                                                 + "falls die Mana im negativen Bereich sind, Ziehe von Hero hp"
@@ -207,8 +212,12 @@ public class TransformSkill implements ISkillFunction {
                                             + mana
                                             + " abgezogen!!");
                             hero.getHp()
-                                    .setCurrentHealthpoints(
-                                            hero.getHp().getCurrentHealthpoints() - (int) mana);
+                                    .receiveHit(
+                                            new Damage(
+                                                    hero.getHp().getCurrentHealthpoints()
+                                                            - (int) mana,
+                                                    DamageType.PHYSICAL,
+                                                    null));
                             System.out.println(
                                     "Zusaetzlich werden "
                                             + mana
@@ -216,13 +225,6 @@ public class TransformSkill implements ISkillFunction {
                                             + " von HeroHP abgezogen! Hero hat noch "
                                             + hero.getHp().getCurrentHealthpoints()
                                             + "hp");
-                        }
-                        /*
-                           Player HP sind 0, rufe GameOver methode im Player Klasse
-                           auf.
-                        */
-                        if (hero.getHp().getCurrentHealthpoints() <= 0) {
-                            //hero.gameOver();
                         }
                     }
                 }

@@ -28,6 +28,7 @@ public class Skill {
      * @param entity entity which uses the skill
      */
     public void execute(Entity entity) {
+        System.out.println("Skill aktiviert");
         if (!isOnCoolDown() && entity != null) {
             skillFunction.execute(entity);
             if (Game.getHero().isPresent() && entity == Game.getHero().get()) {
@@ -53,7 +54,7 @@ public class Skill {
                     }
                 }
 
-                if (manaPoint > 0 && !hero.requiredLevel()) {
+                if (manaPoint > 0) {
                     if (hero.getMc().getCurrentManaPoint() >= 0) {
                         hero.getMc()
                                 .setCurrentManaPoint(
@@ -92,5 +93,4 @@ public class Skill {
     public void reduceCoolDown() {
         currentCoolDownInFrames = Math.max(0, --currentCoolDownInFrames);
     }
-
 }
