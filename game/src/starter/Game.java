@@ -212,6 +212,11 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         getHero().ifPresent(this::loadNextLevelIfEntityIsOnEndTile);
     }
 
+    public static void addSkeleton(Skeleton skeleton) {
+        monster.add(skeleton);
+        addEntity(skeleton);
+    }
+
     @Override
     public void onLevelLoad() {
         trapGenerators.clear();
@@ -219,7 +224,7 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         levelCounter++;
         entities.clear();
         createNPC();
-        //createMonster();
+        createMonster();
         createWorldItems();
         int randomNumberTraps = new Random().nextInt(2);
         for (int i = 0; i < randomNumberTraps; i++) {
@@ -268,7 +273,7 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
     public void createMonster() {
         monster.clear();
         Random rnd = new Random();
-        int rnd_mon_anz = rnd.nextInt(4);
+        int rnd_mon_anz = rnd.nextInt(1);
         rnd_mon_anz++;
         for (int i = 0; i < rnd_mon_anz; i++) {
             int rnd_mon = new Random().nextInt(3);
@@ -291,7 +296,7 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
                                                             "PositionComponent"));
             npc.setPosition(currentLevel.getRandomFloorTile().getCoordinate().toPoint());
         }
-        ZombieBoss zombieBoss = new ZombieBoss(levelCounter);
+        /*ZombieBoss zombieBoss = new ZombieBoss(levelCounter);
         BiterBoss biterBoss = new BiterBoss(levelCounter);
         OrcBoss orcBoss = new OrcBoss(levelCounter);
         zombieBoss.setPosition(getPositionComponent(zombieBoss));
@@ -299,7 +304,7 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         orcBoss.setPosition(getPositionComponent(orcBoss));
         bosses.add(zombieBoss);
         bosses.add(biterBoss);
-        bosses.add(orcBoss);
+        bosses.add(orcBoss);*/
     }
 
     private PositionComponent getPositionComponent(Entity entity) {

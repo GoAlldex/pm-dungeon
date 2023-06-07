@@ -193,7 +193,7 @@ public class Hero extends Entity {
 
     /** Lade standard Items */
     private void setDefaultItems() {
-        this.inventory = new InventoryComponent(this, 2);
+        this.inventory = new InventoryComponent(this, 10);
         ItemDataGenerator itm = new ItemDataGenerator();
         this.inventory.addItem(itm.getItem(0));
         this.inventory.addItem(itm.getItem(1));
