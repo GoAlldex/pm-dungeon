@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import configuration.Configuration;
 import configuration.KeyboardConfig;
 import controller.AbstractController;
+import controller.ScreenController;
 import controller.SystemController;
 import creature.trap.*;
 import ecs.components.MissingComponentException;
@@ -44,7 +45,7 @@ import tools.Point;
 /** The heart of the framework. From here all strings are pulled. */
 public class Game extends ScreenAdapter implements IOnLevelLoader {
 
-    private final LevelSize LEVELSIZE = LevelSize.SMALL;
+    private static final LevelSize LEVELSIZE = LevelSize.SMALL;
 
     /**
      * The batch is necessary to draw ALL the stuff. Every object that uses draw need to know the
@@ -53,13 +54,13 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
     protected SpriteBatch batch;
 
     /** Contains all Controller of the Dungeon */
-    protected List<AbstractController<?>> controller;
+    public static List<AbstractController<?>> controller;
 
     public static DungeonCamera camera;
     /** Draws objects */
     protected Painter painter;
 
-    protected LevelAPI levelAPI;
+    protected static LevelAPI levelAPI;
     /** Generates the level */
     protected IGenerator generator;
 
@@ -140,20 +141,25 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         createSystems();
     }
 
+    public static boolean getPause() {
+        return paused;
+    }
+
     /** Called at the beginning of each frame. Before the controllers call <code>update</code>. */
     protected void frame() {
-        if(Gdx.input.isKeyJustPressed(Input.Keys.B)) {
-            if(inventoryOpen == false) {
-                //inventory.add(WorldInventoryBuilder.buildWorldInventory(hero.getInventory(), new Point(0,0)));
+        if (Gdx.input.isKeyJustPressed(Input.Keys.B)) {
+            if (inventoryOpen == false) {
+                // inventory.add(WorldInventoryBuilder.buildWorldInventory(hero.getInventory(), new
+                // Point(0,0)));
             } else {
-                //inventory.clear();
+                // inventory.clear();
             }
         }
         setCameraFocus();
         manageEntitiesSets();
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) togglePause();
         tomb.update(levelCounter);
-        for(Monster m : monster) {
+        for (Monster m : monster) {
             m.update();
         }
         hero.update();
@@ -198,28 +204,17 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
                         entities.clear();
                         bosses.clear();
                         monster.clear();
-                        removeEntity(hero);
-                        hero1 = null;
                     }
-                }
-            }
-            // Neustart
-            if (isGameOver) {
-                if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
-                    hero = new Hero();
-                    levelAPI.loadLevel(LEVELSIZE);
-                    gameOver();
-                }
-            }
-            if (Game.getHero().isPresent()) {
-                if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
-                    assert hero1 != null;
-                    hero1.info();
                 }
             }
         }
         tomb.update(entities, levelCounter);
         getHero().ifPresent(this::loadNextLevelIfEntityIsOnEndTile);
+    }
+
+    public static void addSkeleton(Skeleton skeleton) {
+        monster.add(skeleton);
+        addEntity(skeleton);
     }
 
     @Override
@@ -233,7 +228,7 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         createWorldItems();
         int randomNumberTraps = new Random().nextInt(2);
         for (int i = 0; i < randomNumberTraps; i++) {
-            //trapGenerator
+            // trapGenerator
             trapGenerators.add(new SpikesTrap(currentLevel.getFloorTiles()));
             trapGenerators.add(new TeleportTrap(currentLevel.getFloorTiles(), hero));
             trapGenerators.add(new SpawnTrap(currentLevel.getFloorTiles(), levelCounter));
@@ -248,13 +243,15 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         Ghost nGhost = new Ghost();
         tomb = new Tomb(nGhost);
         npcs.add(nGhost);
-        for(NPC n : npcs) {
+        for (NPC n : npcs) {
             entities.add(n);
             PositionComponent npc =
-                (PositionComponent)
-                    n.getComponent(PositionComponent.class)
-                        .orElseThrow(
-                            () -> new MissingComponentException("PositionComponent"));
+                    (PositionComponent)
+                            n.getComponent(PositionComponent.class)
+                                    .orElseThrow(
+                                            () ->
+                                                    new MissingComponentException(
+                                                            "PositionComponent"));
             npc.setPosition(currentLevel.getRandomFloorTile().getCoordinate().toPoint());
         }
         entities.add(tomb);
@@ -265,52 +262,57 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         int rnd_itm_anz = rnd.nextInt(2);
         rnd_itm_anz++;
         ItemDataGenerator itm = new ItemDataGenerator();
-        for(int i = 0; i < rnd_itm_anz; i++) {
-            worldItems.add(WorldItemBuilder.buildWorldItem(itm.generateItemData(), currentLevel.getRandomFloorTile().getCoordinate().toPoint()));
+        for (int i = 0; i < rnd_itm_anz; i++) {
+            worldItems.add(
+                    WorldItemBuilder.buildWorldItem(
+                            itm.generateItemData(),
+                            currentLevel.getRandomFloorTile().getCoordinate().toPoint()));
         }
     }
 
     public void createMonster() {
         monster.clear();
         Random rnd = new Random();
-        int rnd_mon_anz = rnd.nextInt(4);
+        int rnd_mon_anz = rnd.nextInt(1);
         rnd_mon_anz++;
-        for(int i = 0; i < rnd_mon_anz; i++) {
+        for (int i = 0; i < rnd_mon_anz; i++) {
             int rnd_mon = new Random().nextInt(3);
-            if(rnd_mon == 0) {
+            if (rnd_mon == 0) {
                 monster.add(new Biter(levelCounter));
-            } else if(rnd_mon == 1) {
+            } else if (rnd_mon == 1) {
                 monster.add(new Zombie(levelCounter));
             } else {
                 monster.add(new LittleDragon(levelCounter));
             }
         }
-        for(Monster m : monster) {
+        for (Monster m : monster) {
             entities.add(m);
             PositionComponent npc =
-                (PositionComponent)
-                    m.getComponent(PositionComponent.class)
-                        .orElseThrow(
-                            () -> new MissingComponentException("PositionComponent"));
+                    (PositionComponent)
+                            m.getComponent(PositionComponent.class)
+                                    .orElseThrow(
+                                            () ->
+                                                    new MissingComponentException(
+                                                            "PositionComponent"));
             npc.setPosition(currentLevel.getRandomFloorTile().getCoordinate().toPoint());
         }
-        ZombieBoss zombieBoss = new ZombieBoss(levelCounter, hero);
-        BiterBoss biterBoss = new BiterBoss(levelCounter, hero);
-        OrcBoss orcBoss = new OrcBoss(levelCounter, hero);
+        /*ZombieBoss zombieBoss = new ZombieBoss(levelCounter);
+        BiterBoss biterBoss = new BiterBoss(levelCounter);
+        OrcBoss orcBoss = new OrcBoss(levelCounter);
         zombieBoss.setPosition(getPositionComponent(zombieBoss));
         biterBoss.setPosition(getPositionComponent(biterBoss));
         orcBoss.setPosition(getPositionComponent(orcBoss));
         bosses.add(zombieBoss);
         bosses.add(biterBoss);
-        bosses.add(orcBoss);
+        bosses.add(orcBoss);*/
     }
 
     private PositionComponent getPositionComponent(Entity entity) {
         PositionComponent position =
-            (PositionComponent)
-                entity.getComponent(PositionComponent.class)
-                    .orElseThrow(
-                        () -> new MissingComponentException("PositionComponent"));
+                (PositionComponent)
+                        entity.getComponent(PositionComponent.class)
+                                .orElseThrow(
+                                        () -> new MissingComponentException("PositionComponent"));
         addEntity(entity);
         return position;
     }
@@ -324,18 +326,19 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         return Optional.empty();
     }
 
-    private void placeForTraps(Entity entity){
+    private void placeForTraps(Entity entity) {
         for (TrapGenerator trap : trapGenerators) {
-            if (trap.visibility())
-                trap.visibility(false);
+            if (trap.visibility()) trap.visibility(false);
         }
         entities.addAll(trapGenerators);
         for (TrapGenerator trap : trapGenerators) {
             PositionComponent pc =
-                (PositionComponent)
-                    trap.getComponent(PositionComponent.class)
-                        .orElseThrow(
-                            () -> new MissingComponentException("PositionComponent"));
+                    (PositionComponent)
+                            trap.getComponent(PositionComponent.class)
+                                    .orElseThrow(
+                                            () ->
+                                                    new MissingComponentException(
+                                                            "PositionComponent"));
             trap.setFloorTiles(currentLevel.getFloorTiles());
             trap.generatePosition();
             pc.setPosition(trap.position().getPosition());
@@ -407,6 +410,25 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         }
     }
 
+    /**
+     * In der HUD->GameOver Klasse->restart()-methode wird 'loadANewLevelIfHeroDie' aufgerufen, um
+     * das Hero Objekt neu zuladen. GameOver() methode in der Game-Klasse wird aufgerufen, da alle
+     * entities gefroren sind und dies nicht der Fall ist.
+     */
+    public static void loadANewLevelIfHeroDie() {
+        Hero meinHero = (Hero) hero;
+        if (meinHero.isGameOver()) {
+            hero = new Hero();
+            levelAPI.loadLevel(LEVELSIZE);
+            gameOver();
+        }
+    }
+
+    /**
+     * GameOver. Die entities werden angehalten, sobald der Hero stirbt. Im zweiten bedienung wird
+     * der GameOverScreen aufgerufen und angezeigt, falls die boolesche Variable: isGameOver wahr
+     * ist.
+     */
     public static void gameOver() {
         isGameOver = !isGameOver;
         if (systems != null) {

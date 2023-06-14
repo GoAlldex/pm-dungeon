@@ -103,7 +103,7 @@ public class Tomb extends Entity {
                 log.info("Punishment: SKELETT");
                 Skeleton skeleton = new Skeleton(level);
                 skeleton.setToTomb(this.position);
-                Game.addEntity(skeleton);
+                Game.addSkeleton(skeleton);
             }
         }
     }

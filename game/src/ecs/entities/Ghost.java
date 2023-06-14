@@ -1,14 +1,22 @@
 package ecs.entities;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import dslToGame.AnimationBuilder;
 import ecs.components.AnimationComponent;
+import ecs.components.HitboxComponent;
 import ecs.components.PositionComponent;
 import ecs.components.VelocityComponent;
 import ecs.components.ai.AIComponent;
 import ecs.components.ai.idle.PatrouilleWalk;
 import ecs.components.ai.idle.RadiusWalk;
 import ecs.components.ai.idle.StaticRadiusWalk;
+import ecs.entities.boss.Boss;
 import graphic.Animation;
+import graphic.hud.Dialog;
+import starter.Game;
+
 import java.util.Random;
 
 /**
@@ -29,6 +37,9 @@ public class Ghost extends NPC {
     private AnimationComponent ani;
     private String empty = "npc/ghost/empty/";
     private boolean tomb = false;
+    private boolean dialogueIsOpen = false;
+    private boolean collision = false;
+    private Dialog dialog;
 
     /**
      * <b><span style="color: rgba(3,71,134,1);">Konstruktor</span></b><br>
@@ -52,6 +63,7 @@ public class Ghost extends NPC {
         this.ai = new AIComponent(this);
         monsterMoveStrategy();
         this.ai.execute();
+        setupHitboxComponent();
     }
 
     private void monsterMoveStrategy() {
@@ -89,15 +101,20 @@ public class Ghost extends NPC {
 
     @Override
     public void update() {
+        dialogue();
+        animation();
+    }
+
+    private void animation() {
         if (!isTomb()) {
             this.frameCounter++;
             if (this.frameCounter == this.invisibleFrames) {
                 setVisible(false);
                 this.ani =
-                        new AnimationComponent(
-                                this,
-                                AnimationBuilder.buildAnimation(this.empty),
-                                AnimationBuilder.buildAnimation(this.empty));
+                    new AnimationComponent(
+                        this,
+                        AnimationBuilder.buildAnimation(this.empty),
+                        AnimationBuilder.buildAnimation(this.empty));
             }
             if (this.frameCounter == (this.invisibleFrames * 2)) {
                 setVisible(true);
@@ -111,6 +128,37 @@ public class Ghost extends NPC {
                 this.frameCounter = 0;
             }
         }
+    }
+
+    private void dialogue() {
+        if(Gdx.input.isKeyJustPressed(Input.Keys.E) && !dialogueIsOpen && collision) {
+            dialogueIsOpen = true;
+            Game.togglePause();
+            dialog = new Dialog();
+            dialog.createPanel();
+            Game.controller.add(dialog);
+        } else if(Gdx.input.isKeyJustPressed(Input.Keys.E) && dialogueIsOpen) {
+            dialogueIsOpen = false;
+            Game.controller.remove(dialog);
+            Game.togglePause();
+        } else if(Gdx.input.isKeyJustPressed(Input.Keys.ENTER) && dialogueIsOpen) {
+            dialog.setText();
+        }
+    }
+
+    public boolean getDialog() {
+        return this.dialogueIsOpen;
+    }
+
+    private void setupHitboxComponent() {
+        new HitboxComponent(
+            this,
+            (you, other, direction) -> {
+                collision = true;
+            },
+            (you, other, direction) -> {
+                collision = false;
+            });
     }
 
     public boolean isVisible() {

@@ -53,6 +53,7 @@ public abstract class Monster extends Entity {
     protected Animation hitAnimation;
     protected Animation dieAnimation;
     protected AnimationComponent monsterAnimation;
+    protected HitboxComponent hitBox;
 
     protected static final Logger log = Logger.getLogger(Biter.class.getName());
 

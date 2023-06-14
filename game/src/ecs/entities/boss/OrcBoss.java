@@ -1,18 +1,21 @@
 package ecs.entities.boss;
 
+import dslToGame.AnimationBuilder;
 import ecs.components.HealthComponent;
 import ecs.components.HitboxComponent;
-import ecs.components.MissingComponentException;
 import ecs.components.PositionComponent;
 import ecs.components.ai.AIComponent;
 import ecs.components.ai.idle.PatrouilleWalk;
 import ecs.components.skill.MeditationSkill;
 import ecs.components.skill.Skill;
 import ecs.components.xp.XPComponent;
+import ecs.damage.Damage;
+import ecs.damage.DamageType;
 import ecs.entities.Entity;
 import ecs.entities.Hero;
 import ecs.items.ItemDataGenerator;
 import ecs.items.WorldItemBuilder;
+import graphic.Animation;
 import java.util.Random;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -28,7 +31,9 @@ import starter.Game;
 public class OrcBoss extends Boss {
 
     // attributen
-    private final String pathToTextur = "monster/type5/boss/";
+    private static final String PATH_TO_TEXTUR = "monster/type5/boss/";
+    private static final Animation DIE_ANIMATION =
+            AnimationBuilder.buildAnimation(PATH_TO_TEXTUR + "death");
     private int heroXP = 0;
     private int heroDMG = 0;
     private float multi = 0.35f;
@@ -40,10 +45,11 @@ public class OrcBoss extends Boss {
      *
      * @param level Held aktuelle level
      */
-    public OrcBoss(int level, Entity heroEntity) {
+    public OrcBoss(int level) {
         super(level);
         this.bossLogger = Logger.getLogger(getClass().getName());
-        setup(heroEntity);
+        onDeath();
+        setup();
         setupVelocityComponent();
         setupAnimationComponent();
         setupHitboxComponent();
@@ -52,26 +58,21 @@ public class OrcBoss extends Boss {
         setItem();
     }
 
-    /**
-     * Initialisiere alle erforderlichen Variablen für BiterBoss
-     *
-     * @param entity Hero entity
-     */
-    private void setup(Entity entity) {
+    /** Initialisiere alle erforderlichen Variablen für BiterBoss */
+    private void setup() {
         this.position = new PositionComponent(this);
         bossPosition(getPosition());
-        heroPosition(new PositionComponent(entity));
-        this.hero = entity;
-        this.pathToIdleLeft = pathToTextur + "idleLeft";
-        this.pathToIdleRight = pathToTextur + "idleRight";
-        this.pathToRunLeft = pathToTextur + "runLeft";
-        this.pathToRunRight = pathToTextur + "runRight";
+        this.pathToIdleLeft = PATH_TO_TEXTUR + "idleLeft";
+        this.pathToIdleRight = PATH_TO_TEXTUR + "idleRight";
+        this.pathToRunLeft = PATH_TO_TEXTUR + "runLeft";
+        this.pathToRunRight = PATH_TO_TEXTUR + "runRight";
         this.hp = new HealthComponent(this);
         this.hp.setMaximalHealthpoints(
                 Math.round((35 * getLevel()) * (0.5f + ((float) getLevel() / 10) - 0.1f)));
         this.hp.setCurrentHealthpoints(hp.getMaximalHealthpoints());
-        this.hp.setDieAnimation(getEmptyAnimation());
+        this.hp.setDieAnimation(DIE_ANIMATION);
         this.hp.setGetHitAnimation(getEmptyAnimation());
+        this.hp.setOnDeath(death);
         this.speed[0] = 0.22f;
         this.speed[1] = 0.22f;
         this.dmg = Math.round(dmg * (multi + ((float) getLevel() / 10) - 0.1f));
@@ -91,7 +92,10 @@ public class OrcBoss extends Boss {
     private void setupHitboxComponent() {
         new HitboxComponent(
                 this,
-                (you, other, direction) -> onCollision(true),
+                (you, other, direction) -> {
+                    onCollision(true);
+                    if (hero == null) hero = (Hero) other;
+                },
                 (you, other, direction) -> onCollision(false));
     }
 
@@ -168,6 +172,7 @@ public class OrcBoss extends Boss {
             bossLogger.info("Boss(" + getClass().getSimpleName() + ") attack....");
             heroDMG += dmg;
         }
+        hero.getHp().receiveHit(new Damage(heroDMG, DamageType.PHYSICAL, this));
     }
 
     private long timerStart = System.currentTimeMillis();
@@ -190,16 +195,19 @@ public class OrcBoss extends Boss {
 
             // hero attacke
             if (time == new Random().nextInt(2) + 1) {
-                Hero hero1 = (Hero) hero;
-                long heroAttackDMG = hero1.damage();
+                long heroAttackDMG = hero.damage();
                 bossLogger.info(
                         getClass().getSimpleName() + " hat " + hp.getCurrentHealthpoints() + "hp!");
-                hp.setCurrentHealthpoints(hp.getCurrentHealthpoints() - (int) heroAttackDMG);
+                hp.receiveHit(
+                        new Damage(
+                                hp.getCurrentHealthpoints() - (int) heroAttackDMG,
+                                DamageType.PHYSICAL,
+                                this));
                 bossLogger.info(
                         "heroAttack war erfolgreich!! "
                                 + getClass().getSimpleName()
                                 + " hat ("
-                                + hero1.damage()
+                                + hero.damage()
                                 + "damage's) bekommen!!\n"
                                 + getClass().getSimpleName()
                                 + " hat noch "
@@ -222,18 +230,32 @@ public class OrcBoss extends Boss {
                             + heroXP
                             + "xp bekommen!!!");
             new XPComponent(hero).setXP(heroXP);
-            Hero hero1 = (Hero) hero;
-            hero1.setHp(heroDMG);
-            hero1.getMc().generateManaPointToNextLevel();
-            PositionComponent pc =
-                    (PositionComponent)
-                            getComponent(PositionComponent.class)
-                                    .orElseThrow(
-                                            () ->
-                                                    new MissingComponentException(
-                                                            "PositionComponent"));
-            entities.add(WorldItemBuilder.buildWorldItem(item, pc.getPosition()));
-            Game.removeEntity(this);
+            hero.getMc().generateManaPointToNextLevel();
+        }
+    }
+
+    public void onDeath() {
+        this.death =
+                entity -> {
+                    log.info(getClass().getSimpleName() + " died.");
+                    heroXP = (int) xp;
+                    bossLogger.info(
+                            getClass().getSimpleName()
+                                    + " wurde besiegt!\n"
+                                    + "Hero hat "
+                                    + heroXP
+                                    + "xp bekommen!!!");
+                    new XPComponent(hero).setXP(heroXP);
+                    this.hero.getMc().generateManaPointToNextLevel();
+                    dropItem = true;
+                    dropItem();
+                };
+    }
+
+    private void dropItem() {
+        if (dropItem) {
+            Game.addEntity(WorldItemBuilder.buildWorldItem(item, this.position.getPosition()));
+            dropItem = !dropItem;
         }
     }
 }

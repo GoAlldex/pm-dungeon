@@ -14,32 +14,26 @@ import java.util.logging.Logger;
  */
 public class MindControlSkill implements ISkillFunction {
     private boolean fight; // ist der entity am Kämpfen
-    private int level; // Hero level
     private int mana; // Abziehen der mana
     private int hp; // wie viel hp kostet der MindControlSkill
+    private Hero hero;
     private Entity entity;
     private boolean requiredLevel = false;
     private final Logger mindControlLogger = Logger.getLogger(getClass().getName());
 
-    /**
-     * Konstruktor
-     *
-     * @param level aktuelle Entity Level
-     */
-    public MindControlSkill(int level) {
-        this.level = level;
-        assert level != 0;
-        this.mana = Math.round(2f * level);
-        this.hp = Math.round(0.2f * level + 1);
-    }
+    /** Konstruktor */
+    public MindControlSkill() {}
 
     /**
      * @param entity which uses the skill
      */
     @Override
     public void execute(Entity entity) {
+        hero = (Hero) entity;
         // Abfrage ob level > 15 ist
-        if (level >= 15) {
+        if (hero.getLevel() >= 15) {
+            this.mana = Math.round(2f * hero.getLevel());
+            this.hp = Math.round(0.2f * hero.getLevel() + 1);
             if (isFight()) {
                 Hero hero = (Hero) entity;
                 int manaT = hero.getMc().getCurrentManaPoint() - mana; // temp
@@ -79,6 +73,7 @@ public class MindControlSkill implements ISkillFunction {
         } else {
             mindControlLogger.info(
                     "Dein Level ist zu niedrig!!! (" + getClass().getSimpleName() + ")");
+            requiredLevel = true;
         }
     }
 
@@ -107,5 +102,9 @@ public class MindControlSkill implements ISkillFunction {
 
     public void setOther(Entity entity) {
         this.entity = entity;
+    }
+
+    public boolean isRequiredLevel() {
+        return requiredLevel;
     }
 }
