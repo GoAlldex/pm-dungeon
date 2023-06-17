@@ -19,6 +19,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.*;
 import java.util.logging.Logger;
+
+import graphic.hud.GraphicInventory;
 import starter.Game;
 import tools.Constants;
 
@@ -52,7 +54,7 @@ public class Hero extends Entity {
                     new BoomerangSkill(SkillTools::getCursorPositionAsPoint), boomerangCoolDown, 3);
 
     private Skill firstSkill, secondSkill, thirdSkill, fourthSkill;
-    private InventoryComponent inventory;
+    //private InventoryComponent inventory;
     int cd = 30;
     private HealthComponent hp;
     private IOnDeathFunction death;
@@ -71,6 +73,7 @@ public class Hero extends Entity {
     private int frameTime;
     private int melee;
     private HitboxComponent hitBox;
+    private GraphicInventory graphicInventory = new GraphicInventory(this, true);
     private static final Logger log = Logger.getLogger(Hero.class.getName());
 
     /**
@@ -124,6 +127,10 @@ public class Hero extends Entity {
         pc.setSkillSlot5(skill5);
         pc.setSkillSlot6(skill6);
         setDefaultItems();
+    }
+
+    public GraphicInventory getGraphicInventory() {
+        return this.graphicInventory;
     }
 
     public void setupVelocityComponent() {
@@ -227,6 +234,7 @@ public class Hero extends Entity {
             fightMonster();
             skill1_4();
         }
+        this.graphicInventory.renderInventory();
     }
 
     private void skill1_4() {
@@ -287,19 +295,15 @@ public class Hero extends Entity {
         }
     }
 
-    @Override
-    public InventoryComponent getInventory() {
-        return this.inventory;
-    }
-
     /**
-     <b><span style="color: rgba(3,71,134,1);">Wenn der Held stirbt</span></b><br>
-     - Leere das Kampfsystem
-     - Setze sterbe Animation
-     - Entferne den Helden
-     @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
-     @version cycle_4
-     @since 04.06.2023
+     * <b><span style="color: rgba(3,71,134,1);">Wenn der Held stirbt</span></b><br>
+     * - Leere das Kampfsystem
+     * - Setze sterbe Animation
+     * - Entferne den Helden
+     *
+     * @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+     * @version cycle_2
+     * @since 04.06.2023
      */
     public void onDeath() {
         this.death = entity -> {

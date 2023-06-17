@@ -26,19 +26,19 @@ public class ItemDataGenerator {
     private List<ItemData> templates =
             List.of(
                     new ItemData(
-                            ItemType.Basic,
+                            ItemType.HP,
                             new Animation(potion_world, 1),
                             new Animation(potion_inventory, 1),
                             "Trank",
                             "Füllt die HP um 10% auf."),
                     new ItemData(
-                            ItemType.Basic,
+                            ItemType.WEAPON,
                             new Animation(weapon1_world, 1),
                             new Animation(weapon1_inventory, 1),
                             "Schwert",
                             "Fügt Schaden zu."),
                     new ItemData(
-                            ItemType.Basic,
+                            ItemType.INVENTORY,
                             new Animation(bag_world, 1),
                             new Animation(bag_inventory, 1),
                             "Tasche",

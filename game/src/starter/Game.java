@@ -159,9 +159,9 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         manageEntitiesSets();
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) togglePause();
         tomb.update(levelCounter);
-        for (Monster m : monster) {
+        /*for (Monster m : monster) {
             m.update();
-        }
+        }*/
         hero.update();
         if (hero != null && getHero().isPresent()) {
             Hero hero1 = (Hero) hero;
@@ -484,6 +484,10 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
      */
     public static Optional<Entity> getHero() {
         return Optional.ofNullable(hero);
+    }
+
+    public static Hero getHeroEntity() {
+        return (Hero) hero;
     }
 
     /**

@@ -18,12 +18,17 @@ public class Entity {
     public final int id = nextId++;
     private HashMap<Class, Component> components;
     private final Logger entityLogger;
+    protected InventoryComponent inventory;
 
     public Entity() {
         components = new HashMap<>();
         Game.addEntity(this);
         entityLogger = Logger.getLogger(this.getClass().getName());
         entityLogger.info("The entity '" + this.getClass().getSimpleName() + "' was created.");
+    }
+
+    public InventoryComponent getInventory() {
+        return this.inventory;
     }
 
     /**
@@ -62,7 +67,4 @@ public class Entity {
 
     public void update(){};
 
-    public InventoryComponent getInventory() {
-        return null;
-    };
 }

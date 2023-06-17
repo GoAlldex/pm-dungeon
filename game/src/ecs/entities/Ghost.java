@@ -4,17 +4,16 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import dslToGame.AnimationBuilder;
-import ecs.components.AnimationComponent;
-import ecs.components.HitboxComponent;
-import ecs.components.PositionComponent;
-import ecs.components.VelocityComponent;
+import ecs.components.*;
 import ecs.components.ai.AIComponent;
 import ecs.components.ai.idle.PatrouilleWalk;
 import ecs.components.ai.idle.RadiusWalk;
 import ecs.components.ai.idle.StaticRadiusWalk;
 import ecs.entities.boss.Boss;
+import ecs.items.ItemDataGenerator;
 import graphic.Animation;
 import graphic.hud.Dialog;
+import graphic.hud.GraphicInventory;
 import starter.Game;
 
 import java.util.Random;
@@ -40,6 +39,7 @@ public class Ghost extends NPC {
     private boolean dialogueIsOpen = false;
     private boolean collision = false;
     private Dialog dialog;
+    private GraphicInventory graphicInventory = new GraphicInventory(this, false);
 
     /**
      * <b><span style="color: rgba(3,71,134,1);">Konstruktor</span></b><br>
@@ -64,6 +64,15 @@ public class Ghost extends NPC {
         monsterMoveStrategy();
         this.ai.execute();
         setupHitboxComponent();
+        setDefaultItems();
+    }
+
+    private void setDefaultItems() {
+        this.inventory = new InventoryComponent(this, 10);
+        ItemDataGenerator itm = new ItemDataGenerator();
+        this.inventory.addItem(itm.getItem(0));
+        this.inventory.addItem(itm.getItem(1));
+        this.inventory.addItem(itm.getItem(2));
     }
 
     private void monsterMoveStrategy() {
@@ -101,7 +110,10 @@ public class Ghost extends NPC {
 
     @Override
     public void update() {
-        dialogue();
+        //dialogue();
+        if(collision) {
+            this.graphicInventory.renderInventory();
+        }
         animation();
     }
 
@@ -177,6 +189,14 @@ public class Ghost extends NPC {
         this.tomb = tomb;
     }
 
+    /**
+     * <b><span style="color: rgba(3,71,134,1);">Setze den Geist zum Grabstein</span></b><br>
+     * Setzt den Geist zum Grabstein
+     *
+     * @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+     * @version cycle_2
+     * @since 08.05.2023
+     */
     public void setToTomb(PositionComponent position) {
         if (!this.tomb) {
             this.speed[0] = 0;

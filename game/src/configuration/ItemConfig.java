@@ -17,7 +17,7 @@ public class ItemConfig {
 
     /** The Type of the Default ItemData */
     public static final ConfigKey<ItemType> TYPE =
-            new ConfigKey<>(new String[] {"type"}, new ConfigEnumValue<>(ItemType.Basic));
+            new ConfigKey<>(new String[] {"type"}, new ConfigEnumValue<>(ItemType.HP));
 
     /** The texturepath of the Default ItemData will be used for world and Inventory */
     public static final ConfigKey<String> TEXTURE =
