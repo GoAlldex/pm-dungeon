@@ -99,7 +99,12 @@ public class LittleDragon extends Monster {
     @Override
     public void update() {
         if(!Game.getPause()) {
-            fightHero();
+            if(this.delay == 0) {
+                fightHero();
+                this.delay = 90;
+            } else {
+                this.delay--;
+            }
         }
     }
 

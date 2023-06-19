@@ -24,8 +24,8 @@ public class SkillSystemTest {
         Game.getEntitiesToAdd().clear();
         ISkillFunction skillFunction = Mockito.mock(ISkillFunction.class);
         int coolDownInSeconds = 2;
-        Skill testSkill = new Skill(skillFunction, coolDownInSeconds);
-        Skill testSkill2 = new Skill(skillFunction, coolDownInSeconds);
+        Skill testSkill = new Skill(skillFunction, coolDownInSeconds, 10);
+        Skill testSkill2 = new Skill(skillFunction, coolDownInSeconds, 10);
         SkillComponent sc = new SkillComponent(entity);
         sc.addSkill(testSkill);
         sc.addSkill(testSkill2);

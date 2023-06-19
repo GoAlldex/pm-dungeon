@@ -107,7 +107,12 @@ public class Biter extends Monster {
     @Override
     public void update() {
         if(!Game.getPause()) {
-            fightHero();
+            if(this.delay == 0) {
+                fightHero();
+                this.delay = 90;
+            } else {
+                this.delay--;
+            }
         }
     }
 
@@ -120,19 +125,6 @@ public class Biter extends Monster {
                 if (this.hitPause >= this.frameTime) {
                     this.hitPause = 0;
                     this.hero.getHp().receiveHit(new Damage(this.dmg, PHYSICAL, this));
-                    //this.hero.getHeroAnimation().setCurrentAnimation(this.hero.getHp().getGetHitAnimation());
-                    /*Boolean check_kick = false;
-                    Point npos = hero.getPosition().getPosition();
-                    npos.x += 0.25f;
-                    for(FloorTile ft : Game.currentLevel.getFloorTiles()) {
-                        if(ft.getCoordinate().equals(npos)) {
-                            check_kick = true;
-                            break;
-                        }
-                    }
-                    if(check_kick) {
-                        hero.getPosition().setPosition(npos);
-                    }*/
                     log.info("Biter hits Hero: " + this.dmg + " Hp");
                     if (this.hero.getHp().getCurrentHealthpoints() <= 0) {
                         this.fight = false;
