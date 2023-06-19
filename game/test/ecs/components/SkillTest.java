@@ -13,6 +13,7 @@ public class SkillTest {
 
     private static int value = 0;
     private final int baseCoolDownInSeconds = 2;
+    private final int manaPoint = 10;
 
     private Entity entity;
     private Skill skill;
@@ -27,7 +28,7 @@ public class SkillTest {
     public void execute() {
         // setup
         entity = new Entity();
-        skill = new Skill(skillFunction, baseCoolDownInSeconds);
+        skill = new Skill(skillFunction, baseCoolDownInSeconds, manaPoint);
 
         // test first execution
         assertFalse(skill.isOnCoolDown());

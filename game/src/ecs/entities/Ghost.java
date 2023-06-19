@@ -2,21 +2,21 @@ package ecs.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import dslToGame.AnimationBuilder;
 import ecs.components.*;
 import ecs.components.ai.AIComponent;
 import ecs.components.ai.idle.PatrouilleWalk;
 import ecs.components.ai.idle.RadiusWalk;
 import ecs.components.ai.idle.StaticRadiusWalk;
-import ecs.entities.boss.Boss;
 import ecs.items.ItemDataGenerator;
 import graphic.Animation;
 import graphic.hud.Dialog;
-import graphic.hud.GraphicInventory;
+import graphic.hud.inventory.EntityGraphicInventory;
+import graphic.hud.inventory.HeroGraphicInventory;
 import starter.Game;
 
 import java.util.Random;
+import java.util.logging.Logger;
 
 /**
  * <b><span style="color: rgba(3,71,134,1);">Unsere NPC-Klasse "Geist".</span></b><br>
@@ -39,7 +39,10 @@ public class Ghost extends NPC {
     private boolean dialogueIsOpen = false;
     private boolean collision = false;
     private Dialog dialog;
-    private GraphicInventory graphicInventory = new GraphicInventory(this, false);
+    private int delay = 0;
+    private EntityGraphicInventory graphicInventory;
+    private boolean isOpen = false;
+    private static final Logger log = Logger.getLogger(Ghost.class.getName());
 
     /**
      * <b><span style="color: rgba(3,71,134,1);">Konstruktor</span></b><br>
@@ -111,10 +114,31 @@ public class Ghost extends NPC {
     @Override
     public void update() {
         //dialogue();
-        if(collision) {
-            this.graphicInventory.renderInventory();
-        }
         animation();
+        if(this.collision) {
+            if(this.delay == 0) {
+                if (Gdx.input.isKeyJustPressed(Input.Keys.E) && this.isOpen) {
+                    if(Game.getPause()) {
+                        Game.togglePause();
+                    }
+                    this.delay = 30;
+                    log.info("Inventar wird geschlossen");
+                    this.isOpen = false;
+                    this.graphicInventory.closeInventory();
+                } else if (Gdx.input.isKeyJustPressed(Input.Keys.E) && !this.isOpen) {
+                    if(!Game.getPause()) {
+                        Game.togglePause();
+                    }
+                    this.delay = 30;
+                    log.info("Inventar wird geöffnet");
+                    this.isOpen = true;
+                    this.graphicInventory = new EntityGraphicInventory(this);
+                    this.graphicInventory.openInventory();
+                }
+            } else {
+                this.delay--;
+            }
+        }
     }
 
     private void animation() {

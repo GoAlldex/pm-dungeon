@@ -1,4 +1,4 @@
-package graphic.hud;
+package graphic.hud.inventory;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -12,6 +12,7 @@ import ecs.entities.Entity;
 import ecs.entities.Hero;
 import ecs.items.ItemData;
 import ecs.items.ItemType;
+import graphic.hud.*;
 import starter.Game;
 import tools.Constants;
 import tools.Point;
@@ -94,7 +95,7 @@ public class GraphicInventory <T extends Actor> extends ScreenController<T> {
                     if(Game.getPause()) {
                         Game.togglePause();
                     }
-                    Game.getHeroEntity().getGraphicInventory().closeInventory();
+                    //Game.getHeroEntity().getGraphicInventory().closeInventory();
                     this.delay = 30;
                     log.info("Inventar wird geschlossen");
                     this.isOpen = false;
@@ -103,7 +104,7 @@ public class GraphicInventory <T extends Actor> extends ScreenController<T> {
                     if(!Game.getPause()) {
                         Game.togglePause();
                     }
-                    Game.getHeroEntity().getGraphicInventory().openInventory();
+                    //Game.getHeroEntity().getGraphicInventory().openInventory();
                     this.delay = 30;
                     log.info("Inventar wird geöffnet");
                     this.isOpen = true;
@@ -150,8 +151,8 @@ public class GraphicInventory <T extends Actor> extends ScreenController<T> {
             this.background.setScale(this.scale);
             this.background.setPosition((Constants.WINDOW_WIDTH/40f+this.scale), Constants.WINDOW_HEIGHT/7.5f);
             add((T) this.background);
-            this.legend = new ScreenText("Links klick Item benutzen", new Point(0,0),1f, new LabelStyleBuilder(FontBuilder.DEFAULT_FONT).setFontcolor(Color.WHITE).build());
-            this.legend.setPosition((Constants.WINDOW_WIDTH/8f), Constants.WINDOW_HEIGHT/6.5f);
+            this.legend = new ScreenText("Links klick Item verschieben", new Point(0,0),1f, new LabelStyleBuilder(FontBuilder.DEFAULT_FONT).setFontcolor(Color.WHITE).build());
+            this.legend.setPosition((Constants.WINDOW_WIDTH/9f), Constants.WINDOW_HEIGHT/6.5f);
             add((T) this.legend);
         }
         InventoryComponent inventory = this.entity.getInventory();
@@ -228,7 +229,7 @@ public class GraphicInventory <T extends Actor> extends ScreenController<T> {
             openInventory();
         } else {
             moveItem(index);
-            Game.getHeroEntity().getGraphicInventory().openInventory();
+            //Game.getHeroEntity().getGraphicInventory().openInventory();
             openInventory();
         }
     }

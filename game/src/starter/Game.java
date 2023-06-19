@@ -11,16 +11,12 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import configuration.Configuration;
 import configuration.KeyboardConfig;
 import controller.AbstractController;
-import controller.ScreenController;
 import controller.SystemController;
 import creature.trap.*;
 import ecs.components.MissingComponentException;
 import ecs.components.PositionComponent;
 import ecs.entities.*;
-import ecs.entities.boss.BiterBoss;
 import ecs.entities.boss.Boss;
-import ecs.entities.boss.OrcBoss;
-import ecs.entities.boss.ZombieBoss;
 import ecs.items.ItemDataGenerator;
 import ecs.items.WorldItemBuilder;
 import ecs.systems.*;
@@ -91,11 +87,12 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
     private static ArrayList<NPC> npcs = new ArrayList<>();
     private static Tomb tomb = null;
     public static ArrayList<Boss> bosses = new ArrayList<>();
+    public static Configuration config;
 
     public static void main(String[] args) {
         // start the game
         try {
-            Configuration.loadAndGetConfiguration("dungeon_config.json", KeyboardConfig.class);
+            config = Configuration.loadAndGetConfiguration("dungeon_config.json", KeyboardConfig.class);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -131,11 +128,11 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         gameLogger = Logger.getLogger(this.getClass().getName());
         systems = new SystemController();
         controller.add(systems);
+        hero = new Hero();
         pauseMenu = new PauseMenu<>();
         gameOver = new GameOver<>();
         controller.add(pauseMenu);
         controller.add(gameOver);
-        hero = new Hero();
         levelAPI = new LevelAPI(batch, painter, new WallGenerator(new RandomWalkGenerator()), this);
         levelAPI.loadLevel(LEVELSIZE);
         createSystems();
@@ -147,21 +144,13 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
 
     /** Called at the beginning of each frame. Before the controllers call <code>update</code>. */
     protected void frame() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.B)) {
-            if (inventoryOpen == false) {
-                // inventory.add(WorldInventoryBuilder.buildWorldInventory(hero.getInventory(), new
-                // Point(0,0)));
-            } else {
-                // inventory.clear();
-            }
-        }
         setCameraFocus();
         manageEntitiesSets();
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) togglePause();
         tomb.update(levelCounter);
-        /*for (Monster m : monster) {
+        for (Monster m : monster) {
             m.update();
-        }*/
+        }
         hero.update();
         if (hero != null && getHero().isPresent()) {
             Hero hero1 = (Hero) hero;

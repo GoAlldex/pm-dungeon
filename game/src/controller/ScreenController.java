@@ -2,6 +2,7 @@ package controller;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Scaling;
@@ -29,14 +30,23 @@ public class ScreenController<T extends Actor> extends AbstractController<T> {
                         new ScalingViewport(
                                 Scaling.stretch, Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT),
                         batch);
+        Gdx.input.setInputProcessor(stage);
+    }
 
+    public ScreenController(SpriteBatch batch, int width, int height, float x, float y) {
+        super();
+        stage =
+            new Stage(
+                new ScalingViewport(
+                    Scaling.stretch, width, height),
+                batch);
+        stage.screenToStageCoordinates(new Vector2(x, y));
         Gdx.input.setInputProcessor(stage);
     }
 
     @Override
     public void update() {
         super.update();
-
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
     }
@@ -71,4 +81,5 @@ public class ScreenController<T extends Actor> extends AbstractController<T> {
         e.remove();
         return super.remove(e);
     }
+
 }

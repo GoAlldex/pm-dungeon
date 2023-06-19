@@ -91,6 +91,17 @@ public class Skill {
 
     /** reduces the current cool down by frame */
     public void reduceCoolDown() {
-        currentCoolDownInFrames = Math.max(0, --currentCoolDownInFrames);
+        if(currentCoolDownInFrames != 0) {
+            currentCoolDownInFrames--;
+        }
     }
+
+    public int getCurrentCoolDownInFrames() {
+        return currentCoolDownInFrames;
+    }
+
+    public int getCoolDownInFrames() {
+        return coolDownInFrames;
+    }
+
 }
