@@ -134,6 +134,8 @@ public class EntityGraphicInventory <T extends Actor> extends ScreenController<T
             }
         }
         Game.controller.remove(this);
+        this.stage.clear();
+        this.stage.dispose();
     }
 
     private void checkItem(int index) {
