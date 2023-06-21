@@ -115,6 +115,10 @@ public class Ghost extends NPC {
     public void update() {
         //dialogue();
         animation();
+        graphicInventory();
+    }
+
+    private void graphicInventory() {
         if(this.collision) {
             if(this.delay == 0) {
                 if (Gdx.input.isKeyJustPressed(Input.Keys.E) && this.isOpen) {

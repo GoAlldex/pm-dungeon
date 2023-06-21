@@ -154,10 +154,18 @@ public class HUD<T extends Actor> extends ScreenController<T> {
     }
 
     private void drawDungeonLevel() {
-        ScreenImage levelImg = new ScreenImage("hud/level.png", new Point(Constants.WINDOW_WIDTH/2-32, Constants.WINDOW_HEIGHT-32));
-        levelImg.setScale(0.5f);
+        ScreenImage levelName = new ScreenImage("hud/level.png", new Point(Constants.WINDOW_WIDTH/2-82, Constants.WINDOW_HEIGHT-32));
+        levelName.setScale(1f, 0.5f);
+        add((T) levelName);
+        ScreenText levelNameText = new ScreenText("Dungeon Level", new Point(Constants.WINDOW_WIDTH/2-66, Constants.WINDOW_HEIGHT-24),2f,
+            new LabelStyleBuilder(FontBuilder.DEFAULT_FONT)
+                .setFontcolor(Color.WHITE)
+                .build());
+        add((T) levelNameText);
+        ScreenImage levelImg = new ScreenImage("hud/level.png", new Point(Constants.WINDOW_WIDTH/2+38, Constants.WINDOW_HEIGHT-32));
+        levelImg.setScale(0.25f, 0.5f);
         add((T) levelImg);
-        ScreenText level = new ScreenText("Level "+Game.levelCounter, new Point(Constants.WINDOW_WIDTH/2-24, Constants.WINDOW_HEIGHT-24),2f,
+        ScreenText level = new ScreenText(""+Game.levelCounter+"", new Point(Constants.WINDOW_WIDTH/2+48, Constants.WINDOW_HEIGHT-24),2f,
             new LabelStyleBuilder(FontBuilder.DEFAULT_FONT)
                 .setFontcolor(Color.WHITE)
                 .build());

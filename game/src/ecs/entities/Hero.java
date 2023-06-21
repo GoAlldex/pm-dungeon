@@ -287,6 +287,10 @@ public class Hero extends Entity {
             fightMonster();
             skill1_4();
         }
+        graphicInventory();
+    }
+
+    private void graphicInventory() {
         if(this.delay == 0) {
             if (Gdx.input.isKeyJustPressed(Input.Keys.I) && this.isOpen) {
                 if(Game.getPause()) {
