@@ -2,6 +2,8 @@ package ecs.entities;
 
 import static ecs.damage.DamageType.PHYSICAL;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import dslToGame.AnimationBuilder;
 import ecs.components.*;
 import ecs.components.AnimationComponent;
@@ -11,6 +13,7 @@ import ecs.components.skill.*;
 import ecs.components.xp.XPComponent;
 import ecs.damage.Damage;
 import ecs.entities.boss.Boss;
+import ecs.items.ItemData;
 import ecs.items.ItemDataGenerator;
 import ecs.systems.MyFormatter;
 import graphic.Animation;
@@ -19,6 +22,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.*;
 import java.util.logging.Logger;
+
+import graphic.hud.hud.HUD;
+import graphic.hud.inventory.HeroGraphicInventory;
 import starter.Game;
 import tools.Constants;
 
@@ -28,7 +34,7 @@ import tools.Constants;
  */
 public class Hero extends Entity {
 
-    private int fireballCoolDown = 0, lightningCoolDown = 0;
+    private int fireballCoolDown = 2, lightningCoolDown = 0;
     private LightningLineSkill lightningLineSkill;
     private FireballSkill fireballSkill;
     private TransformSkill transformSkill;
@@ -52,7 +58,7 @@ public class Hero extends Entity {
                     new BoomerangSkill(SkillTools::getCursorPositionAsPoint), boomerangCoolDown, 3);
 
     private Skill firstSkill, secondSkill, thirdSkill, fourthSkill;
-    private InventoryComponent inventory;
+    //private InventoryComponent inventory;
     int cd = 30;
     private HealthComponent hp;
     private IOnDeathFunction death;
@@ -70,7 +76,12 @@ public class Hero extends Entity {
     private int hitPause = 0;
     private int frameTime;
     private int melee;
+    private boolean isOpen = false;
+    private int delay = 0;
+    private HeroGraphicInventory graphicInventory;
     private HitboxComponent hitBox;
+    private ItemData heroWeapon;
+    private HUD hud;
     private static final Logger log = Logger.getLogger(Hero.class.getName());
 
     /**
@@ -106,8 +117,8 @@ public class Hero extends Entity {
         this.position = new PositionComponent(this);
         mc = new ManaComponent(this, 15, Constants.FRAME_RATE);
         onDeath();
-        this.hp = new HealthComponent(this, 200, this.death, this.hitAnimation, this.dieAnimation);
-        this.melee = 100;
+        this.hp = new HealthComponent(this, 50, this.death, this.hitAnimation, this.dieAnimation);
+        this.melee = 5;
         this.hitSpeed = 1;
         setupVelocityComponent();
         setupAnimationComponent();
@@ -124,6 +135,26 @@ public class Hero extends Entity {
         pc.setSkillSlot5(skill5);
         pc.setSkillSlot6(skill6);
         setDefaultItems();
+        setHUD();
+    }
+
+    public PlayableComponent getSkills() {
+        return pc;
+    }
+
+    /**
+     * <b><span style="color: rgba(3,71,134,1);">HUD Initialisieren</span></b><br>
+     * Diese Methode zeigt das Helden HUD an
+     *
+     * @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+     * @version cycle_5
+     * @since 17.06.2023
+     */
+    public void setHUD() {
+        if(Game.controller.contains(this.hud)) {
+            Game.controller.remove(this);
+        }
+        this.hud = new HUD(this);
     }
 
     public void setupVelocityComponent() {
@@ -136,6 +167,18 @@ public class Hero extends Entity {
         Animation idleRight = AnimationBuilder.buildAnimation(pathToIdleRight);
         Animation idleLeft = AnimationBuilder.buildAnimation(pathToIdleLeft);
         this.heroAnimation = new AnimationComponent(this, idleLeft, idleRight);
+    }
+
+    public void setWeapon(ItemData weapon) {
+        this.heroWeapon = weapon;
+    }
+
+    public ItemData getWeapon() {
+        return this.heroWeapon;
+    }
+
+    public HealthComponent getHP() {
+        return this.hp;
     }
 
     /** FireballSkill */
@@ -217,6 +260,23 @@ public class Hero extends Entity {
     // Zeit für Blitzschlag
     private static long timerForLightningStart = System.currentTimeMillis();
 
+    public void setIsOpen(boolean isOpen) {
+        this.delay = 30;
+        this.isOpen = isOpen;
+    }
+
+    public boolean getIsOpen() {
+        return this.isOpen;
+    }
+
+    public void setGraphicInventory(HeroGraphicInventory graphicInventory) {
+        this.graphicInventory = graphicInventory;
+    }
+
+    public HeroGraphicInventory getGraphicInventory() {
+        return this.graphicInventory;
+    }
+
     /**
      * Zeit für Blitzschlag. ist die Zeit für Blitz breakTime erreicht, setzt sich der Skill zurück
      * und kann wieder abgefeuert werden. Der breakTime ist random!
@@ -226,6 +286,32 @@ public class Hero extends Entity {
         if(!Game.getPause()) {
             fightMonster();
             skill1_4();
+        }
+        graphicInventory();
+    }
+
+    private void graphicInventory() {
+        if(this.delay == 0) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.I) && this.isOpen) {
+                if(Game.getPause()) {
+                    Game.togglePause();
+                }
+                this.delay = 30;
+                log.info("Inventar wird geschlossen");
+                this.isOpen = false;
+                this.graphicInventory.closeInventory();
+            } else if (Gdx.input.isKeyJustPressed(Input.Keys.I) && !this.isOpen) {
+                if(!Game.getPause()) {
+                    Game.togglePause();
+                }
+                this.delay = 30;
+                log.info("Inventar wird geöffnet");
+                this.isOpen = true;
+                this.graphicInventory = new HeroGraphicInventory(this);
+                this.graphicInventory.openInventory();
+            }
+        } else {
+            this.delay--;
         }
     }
 
@@ -287,19 +373,15 @@ public class Hero extends Entity {
         }
     }
 
-    @Override
-    public InventoryComponent getInventory() {
-        return this.inventory;
-    }
-
     /**
-     <b><span style="color: rgba(3,71,134,1);">Wenn der Held stirbt</span></b><br>
-     - Leere das Kampfsystem
-     - Setze sterbe Animation
-     - Entferne den Helden
-     @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
-     @version cycle_4
-     @since 04.06.2023
+     * <b><span style="color: rgba(3,71,134,1);">Wenn der Held stirbt</span></b><br>
+     * - Leere das Kampfsystem
+     * - Setze sterbe Animation
+     * - Entferne den Helden
+     *
+     * @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+     * @version cycle_2
+     * @since 04.06.2023
      */
     public void onDeath() {
         this.death = entity -> {

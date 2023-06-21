@@ -34,7 +34,7 @@ public class ItemDataTest {
 
     @Test
     public void testParameterConstructor() {
-        ItemType type = ItemType.Basic;
+        ItemType type = ItemType.HP;
         String inventoryTexture = "InventoryTexture";
         String worldTexture = "WorldTexture";
         String item_name = "r Item Name";

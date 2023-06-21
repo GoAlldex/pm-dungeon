@@ -95,4 +95,9 @@ public class ManaComponent extends Component {
     public void setCurrentManaPoint(int point) {
         this.currentManaPoint = point;
     }
+
+    public void setMaxManaPoint(int point) {
+        this.maxManaPoint = point;
+    }
+
 }

@@ -98,6 +98,10 @@ public class XPComponent extends Component {
     /** Level up hero */
     public void levelUp() {
         Hero hero = (Hero) entity;
+        int hp = hero.getHP().getMaximalHealthpoints();
+        hero.getHP().setMaximalHealthpoints(hp+10);
+        //int mana = hero.getMc().getMaxManaPoint();
+        //hero.getMc().setMaxManaPoint(mana+5);
         hero.lvlUP();
     }
 

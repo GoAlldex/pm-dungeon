@@ -7,42 +7,47 @@ import java.util.Random;
 /** Generator which creates a random ItemData based on the Templates prepared. */
 public class ItemDataGenerator {
     // private static final List<String> missingTexture = List.of("animation/missingTexture.png");
-    private static final List<String> potion_world =
+    private static final List<String> potion_hp_world =
             List.of(
                     "animation/Items/Potions/Big_Red_Potion/drop_animation_1.png",
                     "animation/Items/Potions/Big_Red_Potion/drop_animation_2.png",
                     "animation/Items/Potions/Big_Red_Potion/drop_animation_3.png",
                     "animation/Items/Potions/Big_Red_Potion/drop_animation_4.png");
-    private static final List<String> potion_inventory =
+    private static final List<String> potion_hp_inventory =
             List.of("animation/Items/Potions/Big_Red_Potion/inventory_icon.png");
     private static final List<String> weapon1_world =
             List.of("animation/Items/Weapons/Weapons_melee/Weapon_Sword_Blue_1/show.png");
     private static final List<String> weapon1_inventory =
             List.of("animation/Items/Weapons/Weapons_melee/Weapon_Sword_Blue_1/inventory_icon.png");
-    private static final List<String> bag_world = List.of("animation/Items/Bag/show.png");
-    private static final List<String> bag_inventory =
-            List.of("animation/Items/Bag/inventory_icon.png");
+    private static final List<String> potion_mana_world =
+        List.of(
+            "animation/Items/Potions/Big_Blue_Potion/drop_animation_1.png",
+            "animation/Items/Potions/Big_Blue_Potion/drop_animation_2.png",
+            "animation/Items/Potions/Big_Blue_Potion/drop_animation_3.png",
+            "animation/Items/Potions/Big_Blue_Potion/drop_animation_4.png");
+    private static final List<String> potion_mana_inventory =
+        List.of("animation/Items/Potions/Big_Blue_Potion/inventory_icon.png");
 
     private List<ItemData> templates =
             List.of(
                     new ItemData(
-                            ItemType.Basic,
-                            new Animation(potion_world, 1),
-                            new Animation(potion_inventory, 1),
-                            "Trank",
+                            ItemType.HP,
+                            new Animation(potion_hp_world, 1),
+                            new Animation(potion_hp_inventory, 1),
+                            "HP Trank",
                             "Füllt die HP um 10% auf."),
                     new ItemData(
-                            ItemType.Basic,
+                            ItemType.WEAPON,
                             new Animation(weapon1_world, 1),
                             new Animation(weapon1_inventory, 1),
                             "Schwert",
                             "Fügt Schaden zu."),
                     new ItemData(
-                            ItemType.Basic,
-                            new Animation(bag_world, 1),
-                            new Animation(bag_inventory, 1),
-                            "Tasche",
-                            "Mehr Platz."));
+                            ItemType.MANA,
+                            new Animation(potion_mana_world, 1),
+                            new Animation(potion_mana_inventory, 1),
+                            "Mana Trank",
+                            "Füllt das Mana um 10% auf."));
     private Random rand = new Random();
 
     /**

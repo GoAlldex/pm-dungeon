@@ -33,6 +33,7 @@ public abstract class Monster extends Entity {
     //protected int hp;
     protected HealthComponent hp;
     protected long xp;
+    protected int delay = 0;
     protected int dmg;
     protected int dmgType;
     protected float[] speed = new float[2];
