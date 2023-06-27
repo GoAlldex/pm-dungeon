@@ -94,7 +94,7 @@ public class OrcBoss extends Boss {
                 this,
                 (you, other, direction) -> {
                     onCollision(true);
-                    if (hero == null) hero = (Hero) other;
+                    if (other == Game.getHero().get()) if (hero == null) hero = (Hero) other;
                 },
                 (you, other, direction) -> onCollision(false));
     }

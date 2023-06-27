@@ -2,7 +2,6 @@ package ecs.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import dslToGame.AnimationBuilder;
 import ecs.components.AnimationComponent;
 import ecs.components.HitboxComponent;
@@ -12,12 +11,10 @@ import ecs.components.ai.AIComponent;
 import ecs.components.ai.idle.PatrouilleWalk;
 import ecs.components.ai.idle.RadiusWalk;
 import ecs.components.ai.idle.StaticRadiusWalk;
-import ecs.entities.boss.Boss;
 import graphic.Animation;
 import graphic.hud.Dialog;
-import starter.Game;
-
 import java.util.Random;
+import starter.Game;
 
 /**
  * <b><span style="color: rgba(3,71,134,1);">Unsere NPC-Klasse "Geist".</span></b><br>
@@ -111,10 +108,10 @@ public class Ghost extends NPC {
             if (this.frameCounter == this.invisibleFrames) {
                 setVisible(false);
                 this.ani =
-                    new AnimationComponent(
-                        this,
-                        AnimationBuilder.buildAnimation(this.empty),
-                        AnimationBuilder.buildAnimation(this.empty));
+                        new AnimationComponent(
+                                this,
+                                AnimationBuilder.buildAnimation(this.empty),
+                                AnimationBuilder.buildAnimation(this.empty));
             }
             if (this.frameCounter == (this.invisibleFrames * 2)) {
                 setVisible(true);
@@ -131,17 +128,17 @@ public class Ghost extends NPC {
     }
 
     private void dialogue() {
-        if(Gdx.input.isKeyJustPressed(Input.Keys.E) && !dialogueIsOpen && collision) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.E) && !dialogueIsOpen && collision) {
             dialogueIsOpen = true;
             Game.togglePause();
             dialog = new Dialog();
             dialog.createPanel();
             Game.controller.add(dialog);
-        } else if(Gdx.input.isKeyJustPressed(Input.Keys.E) && dialogueIsOpen) {
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.E) && dialogueIsOpen) {
             dialogueIsOpen = false;
             Game.controller.remove(dialog);
             Game.togglePause();
-        } else if(Gdx.input.isKeyJustPressed(Input.Keys.ENTER) && dialogueIsOpen) {
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) && dialogueIsOpen) {
             dialog.setText();
         }
     }
@@ -152,13 +149,13 @@ public class Ghost extends NPC {
 
     private void setupHitboxComponent() {
         new HitboxComponent(
-            this,
-            (you, other, direction) -> {
-                collision = true;
-            },
-            (you, other, direction) -> {
-                collision = false;
-            });
+                this,
+                (you, other, direction) -> {
+                    collision = true;
+                },
+                (you, other, direction) -> {
+                    collision = false;
+                });
     }
 
     public boolean isVisible() {

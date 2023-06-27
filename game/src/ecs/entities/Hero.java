@@ -44,6 +44,14 @@ public class Hero extends Entity {
     private String pathToRunLeft = "knight/runLeft";
     private String pathToRunRight = "knight/runRight";
 
+    public int getBoomerangCoolDown() {
+        return boomerangCoolDown;
+    }
+
+    public int getArrowCoolDown() {
+        return arrowCoolDown;
+    }
+
     private Skill skill5 =
             new Skill(new ArrowSkill(SkillTools::getCursorPositionAsPoint), arrowCoolDown, 3);
 
@@ -150,10 +158,21 @@ public class Hero extends Entity {
      * der Skill hat ebenso sein eigene Timer für die Wiederaktivierung.
      */
     private void setupLightningLine() {
-        lightningLineSkill = new LightningLineSkill(SkillTools::getCursorPositionAsPoint);
-        lightningCoolDown = lightningLineSkill.getBreakTime();
-        secondSkill =
-                new Skill(lightningLineSkill, lightningCoolDown, lightningLineSkill.getMana());
+        if (lightningLineSkill == null) {
+            lightningLineSkill = new LightningLineSkill(SkillTools::getCursorPositionAsPoint);
+            lightningCoolDown = lightningLineSkill.getBreakTime();
+            secondSkill =
+                    new Skill(lightningLineSkill, lightningCoolDown, lightningLineSkill.getMana());
+        }
+        lightningCoolDown = lightningLineSkill.generateBreakTime();
+    }
+
+    public boolean getLightningCoolDown() {
+        return secondSkill.isOnCoolDown();
+    }
+
+    public LightningLineSkill getLightningLineSkill() {
+        return lightningLineSkill;
     }
 
     /** TransformSkill */
@@ -162,33 +181,42 @@ public class Hero extends Entity {
         thirdSkill = new Skill(transformSkill, 0, 5);
     }
 
+    public TransformSkill getTransform() {
+        return transformSkill;
+    }
+
     private void setupMindControlSkill() {
         mindControlSkill = new MindControlSkill();
         fourthSkill = new Skill(mindControlSkill, 0, mindControlSkill.getMana());
     }
 
+    public MindControlSkill getMindControlSkill() {
+        return mindControlSkill;
+    }
+
     /** CollisionBox */
     private void setupHitboxComponent() {
-        this.hitBox = new HitboxComponent(
-                this,
-                (you, other, direction) -> {
-                    if (you != other) {
-                        for (Boss boss : Game.bosses) {
-                            if (other == boss && boss != null) {
-                                mindControlSkill.setOther(other);
-                                mindControlSkill.setFight(true);
+        this.hitBox =
+                new HitboxComponent(
+                        this,
+                        (you, other, direction) -> {
+                            if (you != other) {
+                                for (Boss boss : Game.bosses) {
+                                    if (other == boss && boss != null) {
+                                        mindControlSkill.setOther(other);
+                                        mindControlSkill.setFight(true);
+                                    }
+                                }
                             }
-                        }
-                    }
-                    if (other instanceof Monster) {
-                        fightHandler.add((Monster) other);
-                    }
-                },
-                (you, other, direction) -> {
-                    if (other instanceof Monster) {
-                        fightHandler.remove(other);
-                    }
-                });
+                            if (other instanceof Monster) {
+                                fightHandler.add((Monster) other);
+                            }
+                        },
+                        (you, other, direction) -> {
+                            if (other instanceof Monster) {
+                                fightHandler.remove(other);
+                            }
+                        });
     }
 
     /** Lade standard Items */
@@ -214,29 +242,94 @@ public class Hero extends Entity {
         if (thirdSkill != skill && fourthSkill != skill) skill.execute(this);
     }
 
-    // Zeit für Blitzschlag
-    private static long timerForLightningStart = System.currentTimeMillis();
-
     /**
      * Zeit für Blitzschlag. ist die Zeit für Blitz breakTime erreicht, setzt sich der Skill zurück
      * und kann wieder abgefeuert werden. Der breakTime ist random!
      */
     @Override
     public void update() {
-        if(!Game.getPause()) {
+        if (!Game.getPause()) {
             fightMonster();
             skill1_4();
+            skill5_6();
         }
+    }
+
+    private long timerForLightning;
+    private long timerForBoomerang;
+    private long timerForArrow;
+    private static long timerForLightningStart = System.currentTimeMillis();
+    private static long timerForBoomerangStart = System.currentTimeMillis();
+    private static long timerForArrowStart = System.currentTimeMillis();
+
+    /**
+     * Wenn der Zeit für Boomerang aktiviert ist, kann man über diese Methode abrufen.
+     *
+     * @return Zeit von Boomerang (CoolDown Time)
+     */
+    public int getTimerForBoomerang() {
+        return (int) timerForBoomerang;
+    }
+
+    /**
+     * Wenn der Zeit für Arrow aktiviert ist, kann man über diese Methode abrufen.
+     *
+     * @return Zeit von Arrow (CoolDown Time)
+     */
+    public int getTimerForArrow() {
+        return (int) timerForArrow;
+    }
+
+    private long timerForBoomerangEnd;
+    private long timerForArrowEnd;
+
+    private void skill5_6() {
+        timerForBoomerangEnd = System.currentTimeMillis();
+        timerForArrowEnd = System.currentTimeMillis();
+        if (skill5.isOnCoolDown()) {
+            timerForArrow = (timerForArrowEnd - timerForArrowStart) / (60 * 60);
+            if (timerForArrow == getBoomerangCoolDown()) {
+                timerForArrowStart = System.currentTimeMillis();
+                skill5.setOnCoolDown(0);
+                timerForArrow = 0;
+                heroLogger.info("Skill ist wieder aktiv!");
+            }
+        } else {
+            timerForArrowEnd = System.currentTimeMillis();
+        }
+        if (skill6.isOnCoolDown()) {
+            timerForBoomerang = (timerForBoomerangEnd - timerForBoomerangStart) / (60 * 60);
+            if (timerForBoomerang == getBoomerangCoolDown()) {
+                timerForBoomerangStart = System.currentTimeMillis();
+                skill6.setOnCoolDown(0);
+                timerForBoomerang = 0;
+                heroLogger.info("Skill ist wieder aktiv!");
+            }
+        } else {
+            timerForBoomerangEnd = System.currentTimeMillis();
+        }
+    }
+
+    /**
+     * Wenn der Zeit für Lightning aktiviert ist, kann man über diese Methode abrufen.
+     *
+     * @return Zeit von Lightning (CoolDown Time)
+     */
+    public int getTimerForLightning() {
+        return (int) timerForLightning;
     }
 
     private void skill1_4() {
         long timerForLightningEnd = System.currentTimeMillis();
         if (secondSkill.isOnCoolDown()) {
-            long timer = (timerForLightningEnd - timerForLightningStart) / (60 * 60);
-            if (timer == lightningLineSkill.getBreakTime()) {
+            timerForLightning = (timerForLightningEnd - timerForLightningStart) / (60 * 60);
+            if (timerForLightning == lightningLineSkill.getBreakTime()) {
+                lightningLineSkill = null;
+                secondSkill = null;
                 lightningCoolDown = 0;
                 setupLightningLine();
                 timerForLightningStart = System.currentTimeMillis();
+                timerForLightning = 0;
                 heroLogger.info("Skill ist wieder aktiv!");
             }
         }
@@ -277,7 +370,12 @@ public class Hero extends Entity {
                     for (Monster m : this.fightHandler) {
                         if (Game.getEntities().contains(m)) {
                             m.getHp().receiveHit(new Damage(this.melee, PHYSICAL, this));
-                            log.info("Hero hits " + m.getClass().getSimpleName() + ": " + this.melee + " Hp");
+                            log.info(
+                                    "Hero hits "
+                                            + m.getClass().getSimpleName()
+                                            + ": "
+                                            + this.melee
+                                            + " Hp");
                         }
                     }
                 } else {
@@ -293,24 +391,24 @@ public class Hero extends Entity {
     }
 
     /**
-     <b><span style="color: rgba(3,71,134,1);">Wenn der Held stirbt</span></b><br>
-     - Leere das Kampfsystem
-     - Setze sterbe Animation
-     - Entferne den Helden
-     @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
-     @version cycle_4
-     @since 04.06.2023
+     * <b><span style="color: rgba(3,71,134,1);">Wenn der Held stirbt</span></b><br>
+     * - Leere das Kampfsystem - Setze sterbe Animation - Entferne den Helden
+     *
+     * @author Alexey Khokhlov, Michel Witt, Ayaz Khudhur
+     * @version cycle_4
+     * @since 04.06.2023
      */
     public void onDeath() {
-        this.death = entity -> {
-            this.hitBox = null;
-            this.fightHandler = new HashSet<>();
-            Game.addEntity(new DeadAnimation(this));
-            log.info("Hero died.");
-            Game.removeEntity(this);
-            gameOver = true;
-            Game.gameOver();
-        };
+        this.death =
+                entity -> {
+                    this.hitBox = null;
+                    this.fightHandler = new HashSet<>();
+                    Game.addEntity(new DeadAnimation(this));
+                    log.info("Hero died.");
+                    Game.removeEntity(this);
+                    gameOver = true;
+                    Game.gameOver();
+                };
     }
 
     public Set<Monster> getFightHandler() {

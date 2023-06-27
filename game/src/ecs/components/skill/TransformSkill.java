@@ -110,10 +110,12 @@ public class TransformSkill implements ISkillFunction {
      * Prüft bei jedes Frame, ob die Zeit abgelaufen ist und die Original Textur laden soll oder
      * nicht.
      */
+    private long timer;
+
     public void update() {
         if (requiredLevel) {
             long timerForTexturEnd = System.currentTimeMillis();
-            long timer = (timerForTexturEnd - timerForTexturStart) / (60 * 60);
+            timer = (timerForTexturEnd - timerForTexturStart) / (60 * 60);
             if (!isActive && timer == randomTimer) {
                 loadDefaultTextur();
                 timerForTexturStart = System.currentTimeMillis();
@@ -121,6 +123,33 @@ public class TransformSkill implements ISkillFunction {
                 randomTimer = new Random().nextInt(max - min + 1) + min; // randomTime
             }
         }
+    }
+
+    /**
+     * Ob der Skill aktiv ist.
+     *
+     * @return Wahr wird zurückgeworfen, wenn der Skill aktiv ist. Ansonsten falsch.
+     */
+    public boolean isActive() {
+        return isActive;
+    }
+
+    /**
+     * Um den Skill nochmal zu benutzen können.
+     *
+     * @return Zeit in Sekunden wird ausgegeben.
+     */
+    public int getTimer() {
+        return (int) timer;
+    }
+
+    /**
+     * CoolDown bzw. BreakTime
+     *
+     * @return breakTime der Skill wird zurückgeworfen.
+     */
+    public int getBreakTime() {
+        return randomTimer;
     }
 
     /**
@@ -264,6 +293,10 @@ public class TransformSkill implements ISkillFunction {
      */
     public void setRequiredLevel(boolean requiredLevel) {
         this.requiredLevel = requiredLevel;
+    }
+
+    public boolean isRequiredLevel() {
+        return requiredLevel;
     }
 
     /**

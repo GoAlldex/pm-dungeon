@@ -33,6 +33,15 @@ public class LightningLineSkill extends DamageProjectileSkill {
     }
 
     /**
+     * BreakTime erstellen
+     *
+     * @return Neues zufallszahl wird generiert.
+     */
+    public int generateBreakTime() {
+        return breakTime = new Random().nextInt(max - min) + min;
+    }
+
+    /**
      * @return Wie viel Mana werden abgezogen
      */
     public int getMana() {

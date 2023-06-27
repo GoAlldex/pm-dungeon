@@ -150,5 +150,4 @@ public class HitboxComponent extends Component {
         return new MissingComponentException(
                 PositionComponent.class.getName() + " in " + HitboxComponent.class.getName());
     }
-
 }

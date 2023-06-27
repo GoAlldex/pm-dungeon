@@ -29,7 +29,13 @@ public class PlayableComponent extends Component {
      * @param skillSlot2 skill that will be on the second skillslot
      */
     public PlayableComponent(
-            Entity entity, Skill skillSlot1, Skill skillSlot2, Skill skillSlot3, Skill skillSlot4, Skill skillSlot5, Skill skillSlot6) {
+            Entity entity,
+            Skill skillSlot1,
+            Skill skillSlot2,
+            Skill skillSlot3,
+            Skill skillSlot4,
+            Skill skillSlot5,
+            Skill skillSlot6) {
         super(entity);
         playable = true;
         this.skillSlot1 = skillSlot1;
@@ -137,5 +143,4 @@ public class PlayableComponent extends Component {
     public Optional<Skill> getSkillSlot6() {
         return Optional.ofNullable(skillSlot6);
     }
-
 }
