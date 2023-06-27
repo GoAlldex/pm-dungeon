@@ -181,13 +181,13 @@ public class UI_HUD<T extends Actor> extends ScreenController<T> {
 
         // prüft am Anfang, welche Skill noch nicht freigeschaltet sind.
         if (hero != null && !erforderlicheLevel) {
-            if (hero.getLevel() >= 3) {
+            if (!hero.requiredLevel()) {
                 addDisableBackground(Skill.LIGHTNING.name(), secondSkillX());
             }
-            if (hero.getLevel() >= 10) {
+            if (!hero.getTransform().isRequiredLevel()) {
                 addDisableBackground(Skill.TRANSFORM.name(), thirdSkillX());
             }
-            if (hero.getLevel() >= 15) {
+            if (!hero.getMindControlSkill().isRequiredLevel()) {
                 addDisableBackground(Skill.MIND_CONTROL.name(), fourtSkillX());
             }
             erforderlicheLevel = true;
