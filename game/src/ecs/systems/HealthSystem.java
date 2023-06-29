@@ -7,9 +7,7 @@ import ecs.components.stats.StatsComponent;
 import ecs.components.xp.XPComponent;
 import ecs.damage.DamageType;
 import ecs.entities.*;
-
 import java.util.stream.Stream;
-
 import starter.Game;
 
 /**
@@ -94,7 +92,7 @@ public class HealthSystem extends ECS_System {
     private void removeDeadEntities(HSData hsd) {
         // Entity appears to be dead, so let's clean up the mess
         hsd.hc.triggerOnDeath();
-        //hsd.ac.setCurrentAnimation(hsd.hc.getDieAnimation());
+        // hsd.ac.setCurrentAnimation(hsd.hc.getDieAnimation());
         /*if(hsd.e instanceof Hero || hsd.e instanceof Monster) {
             Game.addEntity(new DeadAnimation(hsd.hc.getEntity()));
         }

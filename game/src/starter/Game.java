@@ -1,8 +1,5 @@
 package starter;
 
-import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
-import static logging.LoggerConfig.initBaseLogger;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
@@ -11,26 +8,24 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import configuration.Configuration;
 import configuration.KeyboardConfig;
 import controller.AbstractController;
-import controller.ScreenController;
 import controller.SystemController;
-import creature.trap.*;
+import creature.trap.SpawnTrap;
+import creature.trap.SpikesTrap;
+import creature.trap.TeleportTrap;
+import creature.trap.TrapGenerator;
 import ecs.components.MissingComponentException;
 import ecs.components.PositionComponent;
 import ecs.entities.*;
-import ecs.entities.boss.BiterBoss;
 import ecs.entities.boss.Boss;
-import ecs.entities.boss.OrcBoss;
-import ecs.entities.boss.ZombieBoss;
 import ecs.items.ItemDataGenerator;
 import ecs.items.WorldItemBuilder;
 import ecs.systems.*;
 import graphic.DungeonCamera;
 import graphic.Painter;
 import graphic.hud.GameOver;
+import graphic.hud.InventarHUD;
 import graphic.hud.PauseMenu;
-import java.io.IOException;
-import java.util.*;
-import java.util.logging.Logger;
+import graphic.hud.UI_HUD;
 import level.IOnLevelLoader;
 import level.LevelAPI;
 import level.elements.ILevel;
@@ -41,6 +36,13 @@ import level.generator.randomwalk.RandomWalkGenerator;
 import level.tools.LevelSize;
 import tools.Constants;
 import tools.Point;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.logging.Logger;
+
+import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
+import static logging.LoggerConfig.initBaseLogger;
 
 /** The heart of the framework. From here all strings are pulled. */
 public class Game extends ScreenAdapter implements IOnLevelLoader {
@@ -80,6 +82,8 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
     public static ILevel currentLevel;
     private static PauseMenu<Actor> pauseMenu;
     private static GameOver<Actor> gameOver;
+    private static UI_HUD<Actor> ui_hud;
+    private static InventarHUD<Actor> inventarHUD;
     private static Entity hero;
     private Logger gameLogger;
     private static ArrayList<Monster> monster = new ArrayList<>();
@@ -133,7 +137,11 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         controller.add(systems);
         pauseMenu = new PauseMenu<>();
         gameOver = new GameOver<>();
+        ui_hud = new UI_HUD<>();
+        inventarHUD = new InventarHUD<>();
         controller.add(pauseMenu);
+        controller.add(ui_hud);
+        controller.add(inventarHUD);
         controller.add(gameOver);
         hero = new Hero();
         levelAPI = new LevelAPI(batch, painter, new WallGenerator(new RandomWalkGenerator()), this);
@@ -166,26 +174,9 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         if (hero != null && getHero().isPresent()) {
             Hero hero1 = (Hero) hero;
             if (hero1.pc != null) {
-                // Skill 1 - Fireball
-                if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
-                    if (hero1.pc.getSkillSlot1().isPresent())
-                        hero1.execute(hero1.pc.getSkillSlot1().get());
-                }
-                // Skill 2 - Blitzschlag
-                if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
-                    if (hero1.pc.getSkillSlot2().isPresent())
-                        hero1.execute(hero1.pc.getSkillSlot2().get());
-                }
-                // Skill 3 - Verwandlung
-                if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
-                    if (hero1.pc.getSkillSlot3().isPresent())
-                        hero1.execute(hero1.pc.getSkillSlot3().get());
-                }
-                // Skill 4 Boss Informationen
-                if (Gdx.input.isKeyJustPressed(Input.Keys.F4)) {
-                    if (hero1.pc.getSkillSlot4().isPresent())
-                        hero1.execute(hero1.pc.getSkillSlot4().get());
-                }
+                // SkillSlots
+                skillSlot(hero1);
+
                 // soldange nicht gameover ist, Rufe die methode
                 // update auf
                 if (!hero1.isGameOver()) {
@@ -207,9 +198,33 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
                     }
                 }
             }
+
+            //Inventar Öffnen oder schliessen
+            if (Gdx.input.isKeyJustPressed(Input.Keys.I)){
+                if (!inventarHUD.inventarOpen()){
+                    inventarHUD.show();
+                }else{
+                    inventarHUD.hidden();
+                }
+            }
+
+            //Update methoden
+            ui_hud.updateUI();
+            inventarHUD.updateInventory();
+
         }
+
         tomb.update(entities, levelCounter);
         getHero().ifPresent(this::loadNextLevelIfEntityIsOnEndTile);
+    }
+
+    private static void skillSlot(Hero hero1) {
+        ui_hud.getSkills(hero1);
+
+        // Skill 3 mit Skill 1 tauschen
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F5)) {
+            ui_hud.switchSkill(UI_HUD.Setup_Skill.THIRD_SKILL, UI_HUD.Setup_Skill.FIRST_SKILL);
+        }
     }
 
     public static void addSkeleton(Skeleton skeleton) {
@@ -277,12 +292,12 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         rnd_mon_anz++;
         for (int i = 0; i < rnd_mon_anz; i++) {
             int rnd_mon = new Random().nextInt(3);
-            if (rnd_mon == 0) {
+            if (0 == 0) {
                 monster.add(new Biter(levelCounter));
             } else if (rnd_mon == 1) {
-                monster.add(new Zombie(levelCounter));
+                // monster.add(new Zombie(levelCounter));
             } else {
-                monster.add(new LittleDragon(levelCounter));
+                // monster.add(new LittleDragon(levelCounter));
             }
         }
         for (Monster m : monster) {
@@ -422,6 +437,10 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
             levelAPI.loadLevel(LEVELSIZE);
             gameOver();
         }
+    }
+
+    public static boolean isGameOver() {
+        return isGameOver;
     }
 
     /**

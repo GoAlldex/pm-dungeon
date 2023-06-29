@@ -1,7 +1,5 @@
 package ecs.systems;
 
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.LogRecord;
@@ -15,9 +13,9 @@ public class MyFormatter extends SimpleFormatter {
     }
 
     @Override
-    public String format(LogRecord record){
+    public String format(LogRecord record) {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy -- HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
-        return  name + " :: " + record.getMessage() + " :: " + dtf.format(now) + "\n";
+        return name + " :: " + record.getMessage() + " :: " + dtf.format(now) + "\n";
     }
 }

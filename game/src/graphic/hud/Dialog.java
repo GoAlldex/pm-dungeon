@@ -16,8 +16,7 @@ import tools.Point;
  * @version cycle_4
  * @since 07.06.2023
  */
-
-public class Dialog <T extends Actor> extends ScreenController<T> {
+public class Dialog<T extends Actor> extends ScreenController<T> {
 
     private ScreenInput scin;
     private ScreenText text;
@@ -46,27 +45,32 @@ public class Dialog <T extends Actor> extends ScreenController<T> {
      * @since 07.06.2023
      */
     public void createPanel() {
-        ScreenImage img = new ScreenImage("./game/assets/window/window.png", new Point(0,0));
+        ScreenImage img = new ScreenImage("./game/assets/window/window.png", new Point(0, 0));
         img.setScaleX(0.5f);
         img.setScaleY(0.5f);
         img.setPosition(
-            ((Constants.WINDOW_WIDTH) / 1.25f),
-            ((Constants.WINDOW_HEIGHT)/ 6f),Align.center | Align.bottom);
-        add((T)img);
-        text = new ScreenText("Sprich mich nicht an!", new Point(0,0),1f,
-            new LabelStyleBuilder(FontBuilder.DEFAULT_FONT)
-                .setFontcolor(Color.WHITE)
-                .build());
+                ((Constants.WINDOW_WIDTH) / 1.25f),
+                ((Constants.WINDOW_HEIGHT) / 6f),
+                Align.center | Align.bottom);
+        add((T) img);
+        text =
+                new ScreenText(
+                        "Sprich mich nicht an!",
+                        new Point(0, 0),
+                        1f,
+                        new LabelStyleBuilder(FontBuilder.DEFAULT_FONT)
+                                .setFontcolor(Color.WHITE)
+                                .build());
         text.setPosition(
-            ((Constants.WINDOW_WIDTH) / 5.6f),
-            ((Constants.WINDOW_HEIGHT) / 1.3f),
-            Align.left | Align.topLeft);
-        add((T)text);
+                ((Constants.WINDOW_WIDTH) / 5.6f),
+                ((Constants.WINDOW_HEIGHT) / 1.3f),
+                Align.left | Align.topLeft);
+        add((T) text);
         scin = new ScreenInput("Dein Text...", new Point(0, 0));
         scin.setPosition(
-            ((Constants.WINDOW_WIDTH) / 1f - scin.getWidth()),
-            ((Constants.WINDOW_HEIGHT) / 6f + scin.getHeight()),
-            Align.center | Align.bottom);
+                ((Constants.WINDOW_WIDTH) / 1f - scin.getWidth()),
+                ((Constants.WINDOW_HEIGHT) / 6f + scin.getHeight()),
+                Align.center | Align.bottom);
         add((T) scin);
     }
 
@@ -80,14 +84,15 @@ public class Dialog <T extends Actor> extends ScreenController<T> {
      * @since 07.06.2023
      */
     public void setText() {
-        switch(dialog_entry) {
+        switch (dialog_entry) {
             default:
                 text.setText("Was?");
                 scin.setText("Dein Text...");
                 break;
             case 0:
-                if(scin.getText().trim().equals("Ich brauche was kniffliges")) {
-                    text.setText("Der 02.02.2000 war ein Tag an dem das Datum nur gerade\nZiffern enthalten hat. Wann war das das letzte Mal davor so?");
+                if (scin.getText().trim().equals("Ich brauche was kniffliges")) {
+                    text.setText(
+                            "Der 02.02.2000 war ein Tag an dem das Datum nur gerade\nZiffern enthalten hat. Wann war das das letzte Mal davor so?");
                     scin.setText("Dein Text...");
                     dialog_entry++;
                 } else {
@@ -96,7 +101,7 @@ public class Dialog <T extends Actor> extends ScreenController<T> {
                 }
                 break;
             case 1:
-                if(scin.getText().trim().equals("28.08.888")) {
+                if (scin.getText().trim().equals("28.08.888")) {
                     text.setText("Richtig!");
                     scin.setText("Dein Text...");
                     dialog_entry = 0;
@@ -107,5 +112,4 @@ public class Dialog <T extends Actor> extends ScreenController<T> {
                 break;
         }
     }
-
 }

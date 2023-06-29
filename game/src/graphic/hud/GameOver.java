@@ -49,7 +49,11 @@ public class GameOver<T extends Actor> extends ScreenController<T> {
 
     /** Zeige das GameOverScreen */
     public void showGameOver() {
-        this.forEach((Actor s) -> s.setVisible(true));
+        this.forEach(
+                (Actor s) -> {
+                    s.setVisible(true);
+                    s.toFront();
+                });
     }
 
     /** Verstecke das GameOverScreen */
