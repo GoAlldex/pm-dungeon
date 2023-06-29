@@ -11,6 +11,8 @@ import ecs.components.skill.*;
 import ecs.components.xp.XPComponent;
 import ecs.damage.Damage;
 import ecs.entities.boss.Boss;
+import ecs.items.IOnUse;
+import ecs.items.ItemData;
 import ecs.items.ItemDataGenerator;
 import ecs.systems.MyFormatter;
 import graphic.Animation;
@@ -225,6 +227,37 @@ public class Hero extends Entity {
         ItemDataGenerator itm = new ItemDataGenerator();
         this.inventory.addItem(itm.getItem(0));
         this.inventory.addItem(itm.getItem(1));
+    }
+
+    /**
+     * Hier kann der Hero die Items Benutzen/verwenden.
+     * @param data ItemData wird erwartet
+     * @return Wahr wenn ein Item benutzt wurde, falsch, wenn dies nicht der Fall ist.
+     */
+    public boolean useItems(ItemData data){
+        for (ItemData data1 : getInventory().getItems()) {
+            if (data.getItemType() == data1.getItemType() && data.getItemName().equalsIgnoreCase("Trank")){
+                int reg = (hp.getCurrentHealthpoints() * 10) / 100;
+                hp.setCurrentHealthpoints(hp.getCurrentHealthpoints() + reg);
+                heroLogger.info("Hero hp haben sich um "+reg+"hp erhoeht!");
+                IOnUse use = data.getOnUse();
+                use.onUse(this, data);
+                return true;
+            }
+            if(data.getItemType() == data1.getItemType() && data.getItemName().equalsIgnoreCase("Schwert")){
+                melee = melee + 10;
+                heroLogger.info("Hero melee haben sich um 10 erhoeht!");
+                IOnUse use = data.getOnUse();
+                use.onUse(this, data);
+                return true;
+            }
+            if(data.getItemType() == data1.getItemType() && data.getItemName().equalsIgnoreCase("Tasche")){
+                IOnUse use = data.getOnUse();
+                use.onUse(this, data);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

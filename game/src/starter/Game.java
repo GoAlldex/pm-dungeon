@@ -1,8 +1,5 @@
 package starter;
 
-import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
-import static logging.LoggerConfig.initBaseLogger;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
@@ -12,7 +9,10 @@ import configuration.Configuration;
 import configuration.KeyboardConfig;
 import controller.AbstractController;
 import controller.SystemController;
-import creature.trap.*;
+import creature.trap.SpawnTrap;
+import creature.trap.SpikesTrap;
+import creature.trap.TeleportTrap;
+import creature.trap.TrapGenerator;
 import ecs.components.MissingComponentException;
 import ecs.components.PositionComponent;
 import ecs.entities.*;
@@ -23,11 +23,9 @@ import ecs.systems.*;
 import graphic.DungeonCamera;
 import graphic.Painter;
 import graphic.hud.GameOver;
+import graphic.hud.InventarHUD;
 import graphic.hud.PauseMenu;
 import graphic.hud.UI_HUD;
-import java.io.IOException;
-import java.util.*;
-import java.util.logging.Logger;
 import level.IOnLevelLoader;
 import level.LevelAPI;
 import level.elements.ILevel;
@@ -38,6 +36,13 @@ import level.generator.randomwalk.RandomWalkGenerator;
 import level.tools.LevelSize;
 import tools.Constants;
 import tools.Point;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.logging.Logger;
+
+import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
+import static logging.LoggerConfig.initBaseLogger;
 
 /** The heart of the framework. From here all strings are pulled. */
 public class Game extends ScreenAdapter implements IOnLevelLoader {
@@ -78,6 +83,7 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
     private static PauseMenu<Actor> pauseMenu;
     private static GameOver<Actor> gameOver;
     private static UI_HUD<Actor> ui_hud;
+    private static InventarHUD<Actor> inventarHUD;
     private static Entity hero;
     private Logger gameLogger;
     private static ArrayList<Monster> monster = new ArrayList<>();
@@ -132,8 +138,10 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
         pauseMenu = new PauseMenu<>();
         gameOver = new GameOver<>();
         ui_hud = new UI_HUD<>();
+        inventarHUD = new InventarHUD<>();
         controller.add(pauseMenu);
         controller.add(ui_hud);
+        controller.add(inventarHUD);
         controller.add(gameOver);
         hero = new Hero();
         levelAPI = new LevelAPI(batch, painter, new WallGenerator(new RandomWalkGenerator()), this);
@@ -169,9 +177,6 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
                 // SkillSlots
                 skillSlot(hero1);
 
-                if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
-                    hero1.info();
-                }
                 // soldange nicht gameover ist, Rufe die methode
                 // update auf
                 if (!hero1.isGameOver()) {
@@ -193,8 +198,22 @@ public class Game extends ScreenAdapter implements IOnLevelLoader {
                     }
                 }
             }
+
+            //Inventar Öffnen oder schliessen
+            if (Gdx.input.isKeyJustPressed(Input.Keys.I)){
+                if (!inventarHUD.inventarOpen()){
+                    inventarHUD.show();
+                }else{
+                    inventarHUD.hidden();
+                }
+            }
+
+            //Update methoden
             ui_hud.updateUI();
+            inventarHUD.updateInventory();
+
         }
+
         tomb.update(entities, levelCounter);
         getHero().ifPresent(this::loadNextLevelIfEntityIsOnEndTile);
     }
